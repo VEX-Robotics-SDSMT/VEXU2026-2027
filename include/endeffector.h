@@ -6,6 +6,7 @@
 namespace EndEffector {
 enum class State {
   RETRACTED,
+  INTAKING_RETRACTED,
   READY,
   SCORING,
 };
@@ -22,7 +23,8 @@ class EndEffector {
   State getCurrState();
 
  private:
-  const int32_t rollerSpeed = 75;
+  const int32_t rollerScoringSpeed = 75;
+  const int32_t rollerIntakingSpeed = 30;
 
   State currState{State::RETRACTED};
   State desiredState{State::RETRACTED};

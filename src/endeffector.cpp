@@ -11,6 +11,9 @@ void EndEffector::periodic() {
       scoreMotors->move(0);
       flipper->retract();
       currState = State::RETRACTED;
+    } else if (desiredState == State::INTAKING_RETRACTED) {
+      flipper->retract();
+      scoreMotors->move(-rollerIntakingSpeed);
     } else if (desiredState == State::READY) {
       scoreMotors->move(0);
       flipper->extend();
@@ -18,7 +21,7 @@ void EndEffector::periodic() {
     } else if (desiredState == State::SCORING) {
       // TODO: Should the class guarantee that we are ready before scoring?
       // impl probably involves a timer and third state variable
-      scoreMotors->move(rollerSpeed);
+      scoreMotors->move(rollerScoringSpeed);
       flipper->extend();
       currState = State::SCORING;
     }
