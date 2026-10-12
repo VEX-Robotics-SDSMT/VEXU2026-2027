@@ -85,7 +85,18 @@ void opcontrol() {
       prevX = false;
     }
 
+    if (master.get_digital(
+            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
+      intake.setState(Intake::State::INTAKING_RETRACTED);
+    } else if (master.get_digital(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
+      intake.setState(Intake::State::INTAKING_EXTENDED);
+    } else {
+      intake.setState(Intake::State::IDLE);
+    }
+
     lift.periodic();
+    intake.periodic();
     // drive.driveVoltage(25, 25);
     pros::delay(20);  // Run for 20 ms then update
   }

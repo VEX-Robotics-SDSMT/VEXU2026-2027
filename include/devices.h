@@ -1,6 +1,8 @@
 #pragma once
 #include "Drivetrain.h"
+#include "intake.h"
 #include "lift.h"
+#include "pros/adi.hpp"
 #include "pros/imu.hpp"
 #include "pros/motor_group.hpp"
 
@@ -87,6 +89,8 @@ inline pros::Rotation yEncoder(YENC);
 
 inline pros::Rotation liftEncoder(LIFTENC);
 
+inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
+
 //===============================================
 // Pneumatics
 //===============================================
@@ -97,3 +101,4 @@ inline pros::Rotation liftEncoder(LIFTENC);
 
 inline Mines::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
 inline Lift::Lift lift(&liftMotors, &liftEncoder);
+inline Intake::Intake intake(&intakePneumatics, &intakeMotors);
