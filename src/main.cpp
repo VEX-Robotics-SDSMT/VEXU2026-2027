@@ -76,7 +76,6 @@ void opcontrol() {
       intake.setState(Intake::State::IDLE);
     }
 
-    lift.periodic();
     intake.periodic();
     // drive.driveVoltage(25, 25);
     pros::delay(20);  // Run for 20 ms then update

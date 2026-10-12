@@ -1,7 +1,6 @@
 #pragma once
 #include "Drivetrain.h"
 #include "intake.h"
-#include "lift.h"
 #include "pros/adi.hpp"
 #include "pros/imu.hpp"
 #include "pros/motor_group.hpp"
