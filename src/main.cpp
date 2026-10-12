@@ -67,25 +67,6 @@ void opcontrol() {
 
   while (true) {
     if (master.get_digital(
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B) &&
-        !prevB) {
-      lift.setSetpointPosition(--setpoint);
-      prevB = true;
-    } else if (!master.get_digital(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
-      prevB = false;
-    }
-    if (master.get_digital(
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X) &&
-        !prevX) {
-      lift.setSetpointPosition(++setpoint);
-      prevX = true;
-    } else if (!master.get_digital(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
-      prevX = false;
-    }
-
-    if (master.get_digital(
             pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
       intake.setState(Intake::State::INTAKING_RETRACTED);
     } else if (master.get_digital(

@@ -100,5 +100,4 @@ inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
 //===============================================
 
 inline Mines::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
-inline Lift::Lift lift(&liftMotors, &liftEncoder);
 inline Intake::Intake intake(&intakePneumatics, &intakeMotors);
