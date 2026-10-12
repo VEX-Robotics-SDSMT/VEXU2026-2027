@@ -2,27 +2,19 @@
 
 #include <math.h>
 
-#include "devices.h"
+#include "PID.h"
 #include "pros/motor_group.hpp"
 #include "pros/rotation.hpp"
 
-namespace Mines::Lift {
+namespace Lift {
 
 typedef double inch;
-
-enum class ControlMode {
-  POSITION = 0,
-  VELOCITY = 1,
-}
 
 class Lift {
  public:
   Lift(pros::MotorGroup* motors, pros::Rotation* rotationSensor);
 
-  void setSepointPosition(inch setpoint);
-  void setSepointVelocity(double rotationsPerMinute);
-
-  void setControlMode(ControlMode newControlMode);
+  void setSetpointPosition(inch setpoint);
 
   inch getSetpoint();
 
@@ -35,8 +27,6 @@ class Lift {
 
   const int numStages = 3;
 
-  ControlMode currControlMode;
-
   // diameter = 0.65 in
   const inch inchesHeightPerRotation = 0.65 * M_PI * numStages;
 
@@ -47,7 +37,9 @@ class Lift {
   inch setpoint;
   inch position;
 
+  Mines::PID positionPID;
+
   inch rotationToHeight(double rotations);
   double heightToRotation(inch height);
 };
-}  // namespace Mines::Lift
+}  // namespace Lift
