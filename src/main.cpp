@@ -66,13 +66,13 @@ void opcontrol() {
   bool prevX = false;
 
   while (true) {
-    if (master.get_digital(
+    if (master.get_digital_new_press(
             pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
       intake.setState(Intake::State::INTAKING_RETRACTED);
-    } else if (master.get_digital(
+    } else if (master.get_digital_new_press(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
       intake.setState(Intake::State::INTAKING_EXTENDED);
-    } else {
+    } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
       intake.setState(Intake::State::IDLE);
     }
 

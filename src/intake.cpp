@@ -1,5 +1,7 @@
 #include "intake.h"
 
+#include <iostream>
+
 #include "pros/adi.hpp"
 #include "pros/motor_group.hpp"
 
@@ -10,14 +12,18 @@ Intake::Intake(pros::adi::Pneumatics* liftPneumatics,
 
 void Intake::periodic() {
   if (desiredState != currState) {
+    std::cout << static_cast<int>(desiredState) << std::endl;
     if (desiredState == State::IDLE) {
       rollerMotors->move(0);
+      currState = State::IDLE;
     } else if (desiredState == State::INTAKING_RETRACTED) {
       rollerMotors->move(intakeVoltage);
       liftPneumatics->retract();
+      currState = State::INTAKING_RETRACTED;
     } else if (desiredState == State::INTAKING_EXTENDED) {
       rollerMotors->move(intakeVoltage);
       liftPneumatics->extend();
+      currState = State::INTAKING_EXTENDED;
     }
   }
 }

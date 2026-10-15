@@ -32,8 +32,8 @@ const inline int8_t RM4 = 14;
 const inline int8_t RM5 = 4;
 
 // Intake Motors
-const inline int8_t IN1 = 1;
-const inline int8_t IN2 = 1;
+const inline int8_t IN1 = 8;
+const inline int8_t IN2 = 10;
 
 // Lift Motors
 const inline int8_t LIFTMOTOR1 = 1;
@@ -68,14 +68,13 @@ inline pros::MotorGroup leftMotors({1});
 inline pros::MotorGroup rightMotors({3});
 
 // Intake Motors
-inline pros::MotorGroup intakeMotors({IN1, -IN2});
+inline pros::MotorGroup intakeMotors({-IN1, -IN2});
 
 // Loader Arm
 inline pros::MotorGroup loaders({L1, -L2});
 
 // Elevator Motors
-// inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
-inline pros::MotorGroup liftMotors({2});
+inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
 
 //===============================================
 // Sensors
