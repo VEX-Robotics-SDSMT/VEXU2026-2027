@@ -22,7 +22,7 @@ class Intake {
   State getCurrState();
 
  private:
-  const int32_t intakeVoltage = 75;
+  const int32_t intakeVoltage = 127;
 
   pros::adi::Pneumatics* liftPneumatics;
   pros::MotorGroup* rollerMotors;
