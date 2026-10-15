@@ -1,122 +1,84 @@
 #include "Drivetrain.h"
 
-#include <numbers>
 #include <math.h>
 
-namespace Mines{
+#include <numbers>
+
+namespace Drivetrain {
 //=======================================
 // Member Variables
 //=======================================
 
-//pros::MotorGroup m_leftMotors;
-//pros::MotorGroup m_rightMotors;
-//Mines::PID m_drivePID;
-//Mines::PID m_turnPID;
+// pros::MotorGroup m_leftMotors;
+// pros::MotorGroup m_rightMotors;
+// Mines::PID m_drivePID;
+// Mines::PID m_turnPID;
 
+Drivetrain::Drivetrain(pros::MotorGroup* leftMotors,
+                       pros::MotorGroup* rightMotors,
+                       pros::Rotation* xOdomRotationSensor, pros::Imu* imu,
+                       double gearRatio, double wheelDiameter,
+                       double odomWheelDiameterInches)
+    : m_drivePID(9, .001, .05, 20),
+      m_turnPID(5, .001, .5, 20),
+      m_leftMotors(leftMotors),
+      m_rightMotors(rightMotors),
+      m_xOdomRotationSensor(xOdomRotationSensor),
+      m_imu(imu),
+      m_gearRatio(gearRatio),
+      m_wheelDiameter(wheelDiameter),
+      odomWheelDiameterInches(odomWheelDiameterInches) {}
 
-Drivetrain::Drivetrain(pros::AbstractMotor* leftMotors,
-                  pros::AbstractMotor* rightMotors,
-                  pros::Rotation* rotationSensor,
-                  pros::Imu* imu,
-                  double gearRatio, double wheelDiameter)
-:
-  m_drivePID(9, .001, .05, 20),
-  m_turnPID(5, .001, .5, 20),
-  m_gearRatio(gearRatio),
-  m_wheelDiameter(wheelDiameter)
-{
-    m_leftMotors = leftMotors;
-    m_rightMotors = rightMotors;
-    m_rotation = rotationSensor;
-    m_imu = imu;
+void Drivetrain::periodic() {
+  headingDegs = m_imu->get_yaw();
+  std::chrono::duration dt =
+      std::chrono::high_resolution_clock::now() - prevPeriodicCall;
+
+  double dt_s = dt.count() * powf(10, -9);
+
+  double change_in = m_xOdomRotationSensor->get_velocity() * dt_s;
+
+  poseEstXIn += change_in * cosf(headingDegs * M_PI / 180.0);
+  poseEstYIn += change_in * sinf(headingDegs * M_PI / 180.0);
+
+  // handle the current state
+  std::visit(
+      [](const auto& s) {
+        using T = std::decay_t<decltype(currState)>;
+        if constexpr (std::is_same_v<T, States::Idle>) {
+          driveVoltage(0, 0);
+        } else if constexpr (std::is_same_v<T, States::DriveVoltage>) {
+          driveVoltage(s.leftVoltage(), s.rightVoltage());
+        } else if constexpr (std::is_same_v<T, States::DrivePose>) {
+          // TODO: not implemented
+        } else if constexpr (std::is_same_v<T, States::DriveDistance>) {
+        } else if constexpr (std::is_same_v<T, States::TurnHeading>) {
+          m_turnPID.setTarget(s.desiredHeadingDegs);
+          double calc = m_turnPID.calculate(headingDegs);
+          driveVoltage(-calc, calc);
+        }
+      },
+      currState);
+
+  prevPeriodicCall = std::chrono::high_resolution_clock::now();
 }
 
-void Drivetrain::driveDistance(double distance, int32_t tol, uint32_t settleTime)
-{
-    double distancePerTurn = (m_wheelDiameter * std::numbers::pi) / m_gearRatio;
-    double target = m_rotation->get_position() + (((distance / distancePerTurn) * 360 )* 100); 
+void Drivetrain::setState(States::State s) {
+  using newT = std::decay_t<decltype(s)>;
+  using curT = std::decay_t<decltype(currState)>;
 
-    m_drivePID.setTarget(target);
-
-    uint32_t time = 0;
-    while(time <= settleTime)
-    {
-        int32_t motorPower = std::clamp((int32_t)m_drivePID.calculate(static_cast<double>(m_rotation->get_position())),-m_voltageCap,m_voltageCap);
-        m_leftMotors->move(motorPower);
-        m_rightMotors->move(motorPower);
-
-        if(m_rotation->get_position() <= target + tol && m_rotation->get_position() >= target - tol)
-        {
-            time += 5;
-        }
-        else
-        {
-            time = 0;
-        }
-
-        pros::delay(5);
-    }
-    m_leftMotors->move(0);
-    m_rightMotors->move(0);
+  if (std::is_same_v<newT, States::DrivePose> && s != currState) {
+    m_drivePID.reset();
+    m_turnPID.reset();
+  } else if (std::is_same_v<newT, States::TurnHeading> && s != currState) {
+    m_turnPID.reset();
+  }
+  currState = std::move(s);
 }
 
-void Drivetrain::turnFor(double angle, double tol, uint32_t settleTime)
-{
-    // Relative turning based on current angle being 0.
-    double target = m_imu->get_rotation() + angle;
-
-    m_turnPID.setTarget(target);
-
-    uint32_t time = 0;
-
-    while(time <= settleTime)
-    {
-        int32_t motorPower = std::clamp((int32_t)m_turnPID.calculate(m_imu->get_rotation()),-m_voltageCap,m_voltageCap);
-        m_leftMotors->move(motorPower);
-        m_rightMotors->move(-motorPower);
-
-        if(m_imu->get_rotation() <= target + tol && m_imu->get_rotation() >= target - tol)
-        {
-            time += 5;
-        }
-        else
-        {
-            time = 0;
-        }
-
-        pros::delay(5);
-    }
+void Drivetrain::driveVoltage(int32_t leftVoltage, int32_t rightVoltage) {
+  m_leftMotors->move(leftVoltage);
+  m_rightMotors->move(rightVoltage);
 }
 
-void Drivetrain::turnTo(double angle, double tol, uint32_t settleTime)
-{
-    // Absolute turning based on starting angle being 0.
-    // Allows for (hopefully) more accurate autonomous routes.
-
-    double target = angle > 180 ? -angle: angle;
-    m_turnPID.setTarget(target);
-
-    uint32_t time = 0;
-
-    while(time <= settleTime)
-    {
-        double angle = fabs(m_imu->get_heading()) - 180;
-
-        int32_t motorPower = std::clamp((int32_t)m_turnPID.calculate(angle), -m_voltageCap, m_voltageCap);
-        m_leftMotors->move(motorPower);
-        m_rightMotors->move(-motorPower);
-
-        if(angle <= target + tol && angle >= target - tol)
-        {
-            time += 5;
-        }
-        else
-        {
-            time = 0;
-        }
-
-        pros::delay(5);
-    }
-}
-
-}
+}  // namespace Drivetrain
