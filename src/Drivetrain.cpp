@@ -30,33 +30,47 @@ Drivetrain::Drivetrain(pros::MotorGroup* leftMotors,
       odomWheelDiameterInches(odomWheelDiameterInches) {}
 
 void Drivetrain::periodic() {
-  headingDegs = m_imu->get_yaw();
+  headingDegs = 90.0;  // m_imu->get_yaw();
   std::chrono::duration dt =
       std::chrono::high_resolution_clock::now() - prevPeriodicCall;
 
   double dt_s = dt.count() * powf(10, -9);
 
-  double change_in = m_xOdomRotationSensor->get_velocity() * dt_s;
+  double change_in =
+      (m_xOdomRotationSensor->get_velocity() / 360.0 * m_wheelDiameter * M_PI) *
+      dt_s;
+  poseAcc += change_in;
 
   poseEstXIn += change_in * cosf(headingDegs * M_PI / 180.0);
   poseEstYIn += change_in * sinf(headingDegs * M_PI / 180.0);
 
+  std::cout << "Drive Periodic " << dt_s << ' ' << change_in << ' ' << poseAcc
+            << ' ' << poseEstXIn << ' ' << poseEstYIn << '\n';
+
   // handle the current state
   std::visit(
-      [](const auto& s) {
-        using T = std::decay_t<decltype(currState)>;
+      [this](const auto& s) {
+        using T = std::decay_t<decltype(s)>;
         if constexpr (std::is_same_v<T, States::Idle>) {
           driveVoltage(0, 0);
+          // std::cout << "drive idle\n";
         } else if constexpr (std::is_same_v<T, States::DriveVoltage>) {
           driveVoltage(s.leftVoltage(), s.rightVoltage());
+          // std::cout << "drive voltage " << s.leftVoltage() << ' '
+          //           << s.rightVoltage() << '\n';
         } else if constexpr (std::is_same_v<T, States::DrivePose>) {
+          std::cout << "drive pose\n";
           // TODO: not implemented
         } else if constexpr (std::is_same_v<T, States::DriveDistance>) {
-        } else if constexpr (std::is_same_v<T, States::TurnHeading>) {
-          m_turnPID.setTarget(s.desiredHeadingDegs);
-          double calc = m_turnPID.calculate(headingDegs);
-          driveVoltage(-calc, calc);
+          std::cout << "drive distance\n";
+        } else {
+          std::cout << "Bad\n";
         }
+        // else if constexpr (std::is_same_v<T, States::TurnHeading>) {
+        //   m_turnPID.setTarget(s.desiredHeadingDegs);
+        //   double calc = m_turnPID.calculate(headingDegs);
+        //   driveVoltage(-calc, calc);
+        // }
       },
       currState);
 
@@ -67,12 +81,13 @@ void Drivetrain::setState(States::State s) {
   using newT = std::decay_t<decltype(s)>;
   using curT = std::decay_t<decltype(currState)>;
 
-  if (std::is_same_v<newT, States::DrivePose> && s != currState) {
+  if (std::is_same_v<newT, States::DrivePose>) {
     m_drivePID.reset();
     m_turnPID.reset();
-  } else if (std::is_same_v<newT, States::TurnHeading> && s != currState) {
-    m_turnPID.reset();
   }
+  // else if (std::is_same_v<newT, States::TurnHeading> && s != currState) {
+  //   m_turnPID.reset();
+  // }
   currState = std::move(s);
 }
 

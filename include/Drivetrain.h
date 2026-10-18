@@ -9,7 +9,10 @@
 #pragma once
 
 // #define DEBUG
+#include <math.h>
+
 #include <chrono>
+#include <functional>
 #include <variant>
 
 #include "PID.h"
@@ -31,8 +34,8 @@ namespace States {
 struct Idle {};
 
 struct DriveVoltage {
-  int32_t (*leftVoltage)(void);
-  int32_t (*rightVoltage)(void);
+  std::function<int32_t()> leftVoltage;
+  std::function<int32_t()> rightVoltage;
 };
 
 struct DrivePose {
@@ -46,12 +49,12 @@ struct DriveDistance {
   double accumulatedDistIn;
 };
 
-struct TurnHeading {
-  double desiredHeadingDegs;
-};
+// struct TurnHeading {
+//   double desiredHeadingDegs;
+// };
 
-using State =
-    std::variant<Idle, DriveVoltage, DrivePose, DriveDistance, TurnHeading>;
+using State = std::variant<Idle, DriveVoltage, DrivePose,
+                           DriveDistance>;  //, TurnHeading>;
 }  // namespace States
 
 /**
@@ -172,8 +175,11 @@ class Drivetrain {
   // odometry
   double poseEstXIn = 0.0;
   double poseEstYIn = 0.0;
+  double poseAcc = 0.0;
   double headingDegs = 0.0;
   std::chrono::time_point<std::chrono::high_resolution_clock> prevPeriodicCall =
       std::chrono::high_resolution_clock::now();
+
+  static double degsToRads(double degs) { return degs / 180.0 * M_PI; }
 };
 }  // namespace Drivetrain

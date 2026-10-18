@@ -1,6 +1,5 @@
 #pragma once
 #include "Drivetrain.h"
-#include "intake.h"
 #include "pros/adi.hpp"
 #include "pros/imu.hpp"
 #include "pros/motor_group.hpp"
@@ -18,18 +17,18 @@ inline pros::Controller master(pros::controller_id_e_t::E_CONTROLLER_MASTER);
 #ifdef RobotOne
 
 // Left Motors
-const inline int8_t LM1 = 5;
-const inline int8_t LM2 = 6;
-const inline int8_t LM3 = 7;
-const inline int8_t LM4 = 9;
-const inline int8_t LM5 = 17;
+const inline int8_t LM1 = 14;
+const inline int8_t LM2 = 4;
+const inline int8_t LM3 = 12;
+const inline int8_t LM4 = 15;
+const inline int8_t LM5 = 3;
 
 // Right Motors
-const inline int8_t RM1 = 3;
-const inline int8_t RM2 = 12;
-const inline int8_t RM3 = 15;
-const inline int8_t RM4 = 14;
-const inline int8_t RM5 = 4;
+const inline int8_t RM1 = 6;
+const inline int8_t RM2 = 5;
+const inline int8_t RM3 = 9;
+const inline int8_t RM4 = 18;
+const inline int8_t RM5 = 7;
 
 // Intake Motors
 const inline int8_t IN1 = 8;
@@ -62,10 +61,8 @@ const inline char SCOREARM = 'A';
 //===============================================
 
 // Drive Train Motors
-// inline pros::MotorGroup leftMotors({-LM1, -LM2, -LM3, -LM4, -LM5});
-// inline pros::MotorGroup rightMotors({RM1, RM2, RM3, RM4, RM5});
-inline pros::MotorGroup leftMotors({1});
-inline pros::MotorGroup rightMotors({3});
+inline pros::MotorGroup leftMotors({-LM1});  //, -LM2, -LM3, -LM4, -LM5});
+inline pros::MotorGroup rightMotors({RM4});  //, RM2, RM3, RM4, RM5});
 
 // Intake Motors
 inline pros::MotorGroup intakeMotors({-IN1, -IN2});
@@ -97,5 +94,4 @@ inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
 // Drivetrain
 //===============================================
 
-inline Mines::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
-inline Intake::Intake intake(&intakePneumatics, &intakeMotors);
+inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
