@@ -83,11 +83,12 @@ void opcontrol() {
     } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R2)) {
       endeffector.setState(EndEffector::State::SCORING);
-    } else {
-      endeffector.setState(EndEffector::State::RETRACTED);
+    } else if (master.get_digital(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
+      endeffector.setState(EndEffector::State::INTAKING_RETRACTED);
     }
-  }
 
-  endeffector.periodic();
-  pros::delay(20);  // Run for 20 ms then update
+    endeffector.periodic();
+    pros::delay(20);  // Run for 20 ms then update
+  }
 }

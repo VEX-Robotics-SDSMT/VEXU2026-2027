@@ -1,12 +1,13 @@
 #include "endeffector.h"
 
+#include <iostream>
+
 namespace EndEffector {
 EndEffector::EndEffector(pros::adi::Pneumatics* flipper,
                          pros::MotorGroup* scoreMotors)
     : flipper(flipper), scoreMotors(scoreMotors) {}
 
 void EndEffector::periodic() {
-  if (desiredState != currState) {
     if (desiredState == State::RETRACTED) {
       scoreMotors->move(0);
       flipper->retract();
@@ -25,10 +26,9 @@ void EndEffector::periodic() {
       flipper->extend();
       currState = State::SCORING;
     }
-  }
 }
 
-void EndEffector::setState(State newState) { currState = newState; }
+void EndEffector::setState(State newState) { desiredState = newState; }
 
 State EndEffector::getCurrState() { return currState; }
 
