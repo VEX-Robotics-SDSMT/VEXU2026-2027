@@ -1,6 +1,7 @@
 #pragma once
 #include "Drivetrain.h"
 #include "pros/adi.hpp"
+#include "pros/gps.hpp"
 #include "pros/imu.hpp"
 #include "pros/motor_group.hpp"
 
@@ -30,6 +31,19 @@ const inline int8_t RM3 = 9;
 const inline int8_t RM4 = 18;
 const inline int8_t RM5 = 7;
 
+// GPS sensors
+const inline int8_t GPS_REVERSE_PORT = 1;
+const inline int8_t GPS_LEFT_PORT = 1;
+
+const double GPS_REVERSE_X_OFF = 0.0;
+const double GPS_REVERSE_Y_OFF = 0.0;
+
+const double GPS_LEFT_X_OFF = 0.0;
+const double GPS_LEFT_Y_OFF = 0.0;
+
+// Inertial
+const inline uint8_t Inertial = 2;
+
 // Intake Motors
 const inline int8_t IN1 = 8;
 const inline int8_t IN2 = 10;
@@ -42,9 +56,6 @@ const inline int8_t LIFTENC = 1;
 // Encoder
 const inline int8_t XENC = 1;
 const inline int8_t YENC = 1;
-
-// Inertial
-const inline uint8_t Inertial = 1;
 
 // Loader
 const inline int8_t L1 = 1;
@@ -86,6 +97,11 @@ inline pros::Rotation liftEncoder(LIFTENC);
 
 inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
 
+inline pros::v5::GPS gpsReverse(GPS_REVERSE_PORT, -GPS_REVERSE_X_OFF,
+                                -GPS_REVERSE_Y_OFF);
+
+inline pros::v5::GPS gpsLeft(GPS_LEFT_PORT, -GPS_LEFT_X_OFF, -GPS_LEFT_Y_OFF);
+
 //===============================================
 // Pneumatics
 //===============================================
@@ -94,4 +110,5 @@ inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
 // Drivetrain
 //===============================================
 
-inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
+inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu,
+                                    &gpsReverse, &gpsLeft);

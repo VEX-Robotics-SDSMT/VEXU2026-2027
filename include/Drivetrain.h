@@ -16,17 +16,11 @@
 #include <variant>
 
 #include "PID.h"
-#include "TaskBase.h"
+#include "kalman.hpp"
+#include "pros/gps.hpp"
 #include "pros/imu.hpp"
 #include "pros/motor_group.hpp"
 #include "pros/rotation.hpp"
-
-/// Debug print macro - outputs to console if DEBUG is defined
-#ifdef DEBUG
-#define PRINT_D(out) std::cout << out << "\n"
-#else
-#define PRINT_D(out)
-#endif
 
 namespace Drivetrain {
 
@@ -49,12 +43,12 @@ struct DriveDistance {
   double accumulatedDistIn;
 };
 
-// struct TurnHeading {
-//   double desiredHeadingDegs;
-// };
+struct TurnHeading {
+  double desiredHeadingDegs;
+};
 
-using State = std::variant<Idle, DriveVoltage, DrivePose,
-                           DriveDistance>;  //, TurnHeading>;
+using State =
+    std::variant<Idle, DriveVoltage, DrivePose, DriveDistance, TurnHeading>;
 }  // namespace States
 
 /**
@@ -82,6 +76,7 @@ class Drivetrain {
    */
   Drivetrain(pros::MotorGroup* leftMotors, pros::MotorGroup* rightMotors,
              pros::Rotation* xOdomRotationSensor, pros::Imu* imu,
+             pros::v5::GPS* reverseGPS, pros::v5::GPS* leftGPS,
              double gearRatio = 1.0, double wheelDiameter = 2.25,
              double odomWheelDiameterInches = 2.0);
 
@@ -155,6 +150,9 @@ class Drivetrain {
   /** Pointer to inertial measurement unit (IMU) for heading/gyro feedback */
   pros::Imu* m_imu;
 
+  pros::v5::GPS* m_reverseGPS;
+  pros::v5::GPS* m_leftGPS;
+
   // ==================== PID Controllers ====================
 
   /** PID controller for closed-loop distance driving control */
@@ -173,13 +171,13 @@ class Drivetrain {
   double m_gearRatio;
 
   // odometry
+  KalmanFilter poseFilter;
   double poseEstXIn = 0.0;
   double poseEstYIn = 0.0;
-  double poseAcc = 0.0;
   double headingDegs = 0.0;
   std::chrono::time_point<std::chrono::high_resolution_clock> prevPeriodicCall =
       std::chrono::high_resolution_clock::now();
 
-  static double degsToRads(double degs) { return degs / 180.0 * M_PI; }
+  static double degsToRads(double degs);
 };
 }  // namespace Drivetrain

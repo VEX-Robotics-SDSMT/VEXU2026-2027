@@ -14,7 +14,7 @@ FWDIR:=$(ROOT)/firmware
 BINDIR=$(ROOT)/bin
 
 
-WARNFLAGS+=
+WARNFLAGS+=-Wno-deprecated-declarations
 EXTRA_CFLAGS=
 EXTRA_CXXFLAGS=
 

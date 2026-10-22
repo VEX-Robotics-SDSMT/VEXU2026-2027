@@ -91,6 +91,6 @@ void opcontrol() {
     //     [&] { return master.get_analog(ANALOG_RIGHT_Y); }));
 
     drive.periodic();
-    pros::delay(20);  // Run for 20 ms then update
+    pros::delay(DT_S / 1000.0);  // Run for 20 ms then update
   }
 }
