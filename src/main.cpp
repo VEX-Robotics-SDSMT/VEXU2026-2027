@@ -44,7 +44,16 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+  while (true) {
+    intake.setState(Intake::State::INTAKING_EXTENDED);
+    intake.periodic();
+    pros::delay(1000);
+    intake.setState(Intake::State::IDLE);
+    intake.periodic();
+    pros::delay(1000);
+  }
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -72,7 +81,8 @@ void opcontrol() {
     } else if (master.get_digital_new_press(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
       intake.setState(Intake::State::INTAKING_EXTENDED);
-    } else if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
+    } else if (master.get_digital_new_press(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
       intake.setState(Intake::State::IDLE);
     }
 
