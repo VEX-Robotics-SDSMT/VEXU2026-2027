@@ -76,14 +76,12 @@ void opcontrol() {
 
   while (true) {
     if (master.get_digital_new_press(
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
-      intake.setState(Intake::State::INTAKING_RETRACTED);
-    } else if (master.get_digital_new_press(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
-      intake.setState(Intake::State::INTAKING_EXTENDED);
-    } else if (master.get_digital_new_press(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
-      intake.setState(Intake::State::IDLE);
+            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1)) {
+      intake.toggleWheels();
+    }
+    if (master.get_digital_new_press(
+            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
+      intake.toggleExtended();
     }
 
     intake.periodic();
