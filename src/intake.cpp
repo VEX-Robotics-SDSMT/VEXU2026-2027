@@ -20,7 +20,7 @@ void Intake::periodic() {
     } else if (desiredState == State::IDLE_RETRACTED) {
       rollerMotors->move(0);
       liftPneumatics->retract();
-      currState = State::IDLE_EXTENDED;
+      currState = State::IDLE_RETRACTED;
     } else if (desiredState == State::INTAKING_RETRACTED) {
       rollerMotors->move(intakeVoltage);
       liftPneumatics->retract();

@@ -44,17 +44,7 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {
-  intake.extend();
-  while (true) {
-    intake.startWheels();
-    intake.periodic();
-    pros::delay(1000);
-    intake.stopWheels();
-    intake.periodic();
-    pros::delay(1000);
-  }
-}
+void autonomous() {}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -86,20 +76,11 @@ void opcontrol() {
       intake.setIdle();
     }
     if (master.get_digital_new_press(
-<<<<<<< Updated upstream
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1)) {
-      intake.toggleWheels();
-    }
-    if (master.get_digital_new_press(
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
-      intake.toggleExtended();
-=======
             pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
       intake.setRetracted();
     } else if (master.get_digital_new_press(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
       intake.setExtended();
->>>>>>> Stashed changes
     }
 
     intake.periodic();
