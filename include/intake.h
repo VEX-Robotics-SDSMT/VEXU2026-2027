@@ -5,12 +5,12 @@
 
 namespace Intake {
 enum class State {
-  // if state & 0b01 == 1, then the wheels are spinning
-  // if state & 0b10 >> 1 == 1, then the intake is extended
-  IDLE_RETRACTED = 0b00,
-  IDLE_EXTENDED = 0b01,
-  INTAKING_RETRACTED = 0b10,
-  INTAKING_EXTENDED = 0b11,
+  IDLE_EXTENDED,
+  IDLE_RETRACTED,
+  INTAKING_EXTENDED,
+  INTAKING_RETRACTED,
+  OUTTAKING_EXTENDED,
+  OUTTAKING_RETRACTED,
 };
 
 class Intake {
@@ -21,19 +21,17 @@ class Intake {
 
   void setState(State newState);
 
-  void stopWheels();
-  void startWheels();
-  void extend();
-  void retract();
-
-  void toggleWheels();
-  void toggleExtended();
-
   State getDesiredState();
   State getCurrState();
+  void setIdle();
+  void setIntaking();
+  void setOuttaking();
+  void setExtended();
+  void setRetracted();
 
  private:
   const int32_t intakeVoltage = 127;
+  const int32_t outtakeVoltage = -127;
 
   pros::adi::Pneumatics* liftPneumatics;
   pros::MotorGroup* rollerMotors;
