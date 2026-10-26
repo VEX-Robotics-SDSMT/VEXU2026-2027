@@ -45,11 +45,12 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+  intake.extend();
   while (true) {
-    intake.setState(Intake::State::INTAKING_EXTENDED);
+    intake.startWheels();
     intake.periodic();
     pros::delay(1000);
-    intake.setState(Intake::State::IDLE);
+    intake.stopWheels();
     intake.periodic();
     pros::delay(1000);
   }
