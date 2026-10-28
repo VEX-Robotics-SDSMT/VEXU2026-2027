@@ -5,15 +5,19 @@
 #include "pros/motor_group.hpp"
 
 namespace Driver {
-Driver::Driver(pros::MotorGroup* leftMotors, pros::MotorGroup* rightMotors,
-               pros::Controller* master)
-    : leftMotors(leftMotors), rightMotors(rightMotors), master(master) {}
+Driver::Driver(Mines::Drivetrain* driveTrain, pros::Controller* master)
+    : driveTrain(driveTrain), master(master) {}
 
-void Driver::periodic() { return; }
+void Driver::periodic() { driveTrain->driveVoltage(leftVoltage, rightVoltage); }
 
-void AlexDrive() { return; }
+void Driver::AlexDrive() {
+  leftVoltage = xInput + yInput;
+  rightVoltage = xInput - yInput;
 
-void AlfredoDrive() { return; }
+  return;
+}
+
+void Driver::AlfredoDrive() { return; }
 
 void Driver::setDrive(int32_t x, int32_t y) {
   yInput = y;

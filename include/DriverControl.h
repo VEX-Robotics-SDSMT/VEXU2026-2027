@@ -7,8 +7,7 @@
 namespace Driver {
 class Driver {
  public:
-  Driver(pros::MotorGroup* leftMotors, pros::MotorGroup* rightMotors,
-         pros::Controller* master);
+  Driver(Mines::Drivetrain* driveTrain, pros::Controller* master);
 
   void periodic();
 
@@ -19,10 +18,11 @@ class Driver {
   void setDrive(int32_t x, int32_t y);
 
  private:
-  pros::MotorGroup* leftMotors;
+  Mines::Drivetrain* driveTrain;
   pros::MotorGroup* rightMotors;
   pros::Controller* master;
-  int32_t xInput, yInput = 0;
+
+  int32_t xInput, yInput, leftVoltage, rightVoltage = 0;
 };
 
 }  // Namespace Driver
