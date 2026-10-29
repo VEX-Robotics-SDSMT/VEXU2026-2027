@@ -84,6 +84,9 @@ void opcontrol() {
             pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
       intake.toggleExtended();
     }
+    if (master.get_digital_new_press(pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
+      intake.toggle
+    }
 
     intake.periodic();
     // drive.driveVoltage(25, 25);

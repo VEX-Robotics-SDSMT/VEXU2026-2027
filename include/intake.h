@@ -5,12 +5,14 @@
 
 namespace Intake {
 enum class State {
-  // if state & 0b01 == 1, then the wheels are spinning
-  // if state & 0b10 >> 1 == 1, then the intake is extended
-  IDLE_RETRACTED = 0b00,
-  IDLE_EXTENDED = 0b01,
-  INTAKING_RETRACTED = 0b10,
-  INTAKING_EXTENDED = 0b11,
+  // if state & 0b01 == 1, then the intake is extended
+  // if state & 0b10 >> 1 == 1, then the wheels are spinning
+  IDLE_RETRACTED = 0b000,
+  IDLE_EXTENDED = 0b001,
+  INTAKING_RETRACTED = 0b010,
+  INTAKING_EXTENDED = 0b011,
+  OUTTAKING_RETRACTED = 0b100,
+  OUTTAKING_EXTENDED = 0b101,
 };
 
 class Intake {
@@ -23,11 +25,13 @@ class Intake {
 
   void stopWheels();
   void startWheels();
+  void outtake();
   void extend();
   void retract();
 
   void toggleWheels();
   void toggleExtended();
+  void toggleOuttake();
 
   State getDesiredState();
   State getCurrState();

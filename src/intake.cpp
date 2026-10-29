@@ -29,6 +29,14 @@ void Intake::periodic() {
       rollerMotors->move(intakeVoltage);
       liftPneumatics->extend();
       currState = State::INTAKING_EXTENDED;
+    } else if (desiredState == State::OUTTAKING_EXTENDED) {
+      rollerMotors->move(-intakeVoltage);
+      liftPneumatics->extend();
+      currState = State::OUTTAKING_EXTENDED;
+    } else if (desiredState == State::OUTTAKING_RETRACTED) {
+      rollerMotors->move(-intakeVoltage);
+      liftPneumatics->retract();
+      currState = State::OUTTAKING_EXTENDED;
     }
   }
 }
@@ -48,27 +56,27 @@ void Intake::stopWheels() {
 }
 
 void Intake::startWheels() {
-  if (static_cast<int>(currState) & 0b01 == 0b01) {
+  if (static_cast<int>(currState) & 0b001 == 0b001) {
     desiredState = State::INTAKING_EXTENDED;
   } else {
     desiredState = State::INTAKING_RETRACTED;
+  }
+}
+
+void Intake::outtake() {
+  if (static_cast<int>(currState) & 0b001) {
+    desiredState = State::OUTTAKING_EXTENDED;
+  } else {
+    desiredState = State::OUTTAKING_RETRACTED;
   }
 }
 
 void Intake::extend() {
-  if (static_cast<int>(currState) & 0b10 == 0b10) {
-    desiredState = State::INTAKING_EXTENDED;
-  } else {
-    desiredState = State::IDLE_EXTENDED;
-  }
+  desiredState = static_cast<State>(static_cast<int>(currState) | 0b1);
 }
 
 void Intake::retract() {
-  if (static_cast<int>(currState) & 0b10 == 0b10) {
-    desiredState = State::INTAKING_RETRACTED;
-  } else {
-    desiredState = State::IDLE_RETRACTED;
-  }
+  desiredState = static_cast<State>(static_cast<int>(currState) & 0b110);
 }
 
 void Intake::toggleWheels() {
@@ -80,11 +88,7 @@ void Intake::toggleWheels() {
 }
 
 void Intake::toggleExtended() {
-  if (static_cast<int>(currState) & 0b01 == 0b01) {
-    retract();
-  } else {
-    extend();
-  }
+  desiredState = static_cast<State>(static_cast<int>(currState) ^ 0b1);
 }
 
 }  // namespace Intake
