@@ -15,6 +15,7 @@
 #include <functional>
 #include <variant>
 
+#include "Eigen/Core"
 #include "PID.h"
 #include "kalman.hpp"
 #include "pros/gps.hpp"
@@ -32,9 +33,8 @@ struct DriveVoltage {
   std::function<int32_t()> rightVoltage;
 };
 
-struct DrivePose {
-  double xPoseIn;
-  double yPoseIn;
+struct DriveDirection {
+  double distIn;
   double headingDegs;
 };
 
@@ -47,8 +47,8 @@ struct TurnHeading {
   double desiredHeadingDegs;
 };
 
-using State =
-    std::variant<Idle, DriveVoltage, DrivePose, DriveDistance, TurnHeading>;
+using State = std::variant<Idle, DriveVoltage, DriveDirection, DriveDistance,
+                           TurnHeading>;
 }  // namespace States
 
 /**
@@ -76,11 +76,12 @@ class Drivetrain {
    */
   Drivetrain(pros::MotorGroup* leftMotors, pros::MotorGroup* rightMotors,
              pros::Rotation* xOdomRotationSensor, pros::Imu* imu,
-             pros::v5::GPS* reverseGPS, pros::v5::GPS* leftGPS,
              double gearRatio = 1.0, double wheelDiameter = 2.25,
              double odomWheelDiameterInches = 2.0);
 
   void periodic();
+
+  void initPose(double x_meters, double y_meters, double theta_degs);
 
   void setState(States::State s);
 
@@ -125,6 +126,10 @@ class Drivetrain {
     m_turnPID.setIntegralLimit(integralLim);
   };
 
+  void poseReset();
+
+  bool isIdle();
+
  private:
   void driveVoltage(int32_t leftVoltage, int32_t rightVoltage);
 
@@ -150,9 +155,6 @@ class Drivetrain {
   /** Pointer to inertial measurement unit (IMU) for heading/gyro feedback */
   pros::Imu* m_imu;
 
-  pros::v5::GPS* m_reverseGPS;
-  pros::v5::GPS* m_leftGPS;
-
   // ==================== PID Controllers ====================
 
   /** PID controller for closed-loop distance driving control */
@@ -172,12 +174,17 @@ class Drivetrain {
 
   // odometry
   KalmanFilter poseFilter;
-  double poseEstXIn = 0.0;
-  double poseEstYIn = 0.0;
-  double headingDegs = 0.0;
-  std::chrono::time_point<std::chrono::high_resolution_clock> prevPeriodicCall =
-      std::chrono::high_resolution_clock::now();
+  // const int NX = 6;  // states
+  // const int NZ = 3;  // measurements
+  double poseEstXM = 0.0;
+  double poseEstYM = 0.0;
+  double headingOffRads = 0.0;
+
+  void getNewStateForFilter(Eigen::VectorXd& z);
 
   static double degsToRads(double degs);
+  static double wrapPi(double a);
+  static double dist(double x1, double y1, double x2, double y2);
+  static double inchesToMeters(double in);
 };
 }  // namespace Drivetrain

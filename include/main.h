@@ -67,7 +67,7 @@ void disabled(void);
 void competition_initialize(void);
 void opcontrol(void);
 
-#define DT_S 0.02
+#define DT_S 0.1
 #ifdef __cplusplus
 }
 #endif

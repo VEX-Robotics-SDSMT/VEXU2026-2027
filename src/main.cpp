@@ -1,5 +1,6 @@
 #include "main.h"
 
+#include "autos.h"
 #include "devices.h"
 
 /**
@@ -60,7 +61,7 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() { quadrant1(drive); }
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -79,18 +80,27 @@ void opcontrol() {
   pros::Controller master(pros::E_CONTROLLER_MASTER);
 
   while (true) {
-    int dir = master.get_analog(
-        ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
-    int turn = master.get_analog(
-        ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-    // drive.setState(
-    //     Drivetrain::States::DriveVoltage([] { return 50; }, [] { return 50;
-    //     }));
-    // drive.setState(Drivetrain::States::DriveVoltage(
-    //     [&] { return master.get_analog(ANALOG_LEFT_Y); },
-    //     [&] { return master.get_analog(ANALOG_RIGHT_Y); }));
+    if (master.get_digital(
+            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
+      drive.setState(Drivetrain::States::DriveDirection(12.0, 0.0));
+    } else if (master.get_digital_new_press(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
+      drive.poseReset();
+    } else if (master.get_digital(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
+      quadrant1(drive);
+    } else {
+      int dr = master.get_analog(
+          ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
+      int turn = master.get_analog(
+          ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
+      drive.setState(
+          Drivetrain::States::DriveVoltage([dr, turn]() { return dr + turn; },
+                                           [dr, turn]() { return dr - turn; }));
+    }
 
     drive.periodic();
-    pros::delay(DT_S / 1000.0);  // Run for 20 ms then update
+
+    pros::delay(DT_S * 1000.0);  // Run for 20 ms then update
   }
 }

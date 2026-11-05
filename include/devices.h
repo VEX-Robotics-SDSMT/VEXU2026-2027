@@ -55,7 +55,6 @@ const inline int8_t LIFTENC = 1;
 
 // Encoder
 const inline int8_t XENC = 1;
-const inline int8_t YENC = 1;
 
 // Loader
 const inline int8_t L1 = 1;
@@ -72,8 +71,10 @@ const inline char SCOREARM = 'A';
 //===============================================
 
 // Drive Train Motors
-inline pros::MotorGroup leftMotors({-LM1});  //, -LM2, -LM3, -LM4, -LM5});
-inline pros::MotorGroup rightMotors({RM4});  //, RM2, RM3, RM4, RM5});
+inline pros::MotorGroup leftMotors({-LM1, LM2, -LM3, LM4,
+                                    -LM5});  //, -LM2, -LM3, -LM4, -LM5});
+inline pros::MotorGroup rightMotors({RM1, -RM2, -RM3, LM4,
+                                     RM5});  //, RM2, RM3, RM4, RM5});
 
 // Intake Motors
 inline pros::MotorGroup intakeMotors({-IN1, -IN2});
@@ -91,16 +92,10 @@ inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
 inline pros::Imu Imu(Inertial);
 
 inline pros::Rotation xEncoder(XENC);
-inline pros::Rotation yEncoder(YENC);
 
 inline pros::Rotation liftEncoder(LIFTENC);
 
 inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
-
-inline pros::v5::GPS gpsReverse(GPS_REVERSE_PORT, -GPS_REVERSE_X_OFF,
-                                -GPS_REVERSE_Y_OFF);
-
-inline pros::v5::GPS gpsLeft(GPS_LEFT_PORT, -GPS_LEFT_X_OFF, -GPS_LEFT_Y_OFF);
 
 //===============================================
 // Pneumatics
@@ -110,5 +105,4 @@ inline pros::v5::GPS gpsLeft(GPS_LEFT_PORT, -GPS_LEFT_X_OFF, -GPS_LEFT_Y_OFF);
 // Drivetrain
 //===============================================
 
-inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu,
-                                    &gpsReverse, &gpsLeft);
+inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
