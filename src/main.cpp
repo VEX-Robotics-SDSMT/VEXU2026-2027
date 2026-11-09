@@ -83,7 +83,11 @@ void opcontrol() {
     if (master.get_digital(
             pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
       drive.setState(Drivetrain::States::DriveDirection(12.0, 0.0));
-    } else if (master.get_digital_new_press(
+
+    } else if (master.get_digital(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
+      drive.setState(Drivetrain::States::TurnHeading(90.0));
+    } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
       drive.poseReset();
     } else if (master.get_digital(
@@ -95,8 +99,10 @@ void opcontrol() {
       int turn = master.get_analog(
           ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
       drive.setState(
-          Drivetrain::States::DriveVoltage([dr, turn]() { return dr + turn; },
-                                           [dr, turn]() { return dr - turn; }));
+          Drivetrain::States::DriveVoltage([dr, turn]() { return dr + turn;
+          },
+                                           [dr, turn]() { return dr - turn;
+                                           }));
     }
 
     drive.periodic();

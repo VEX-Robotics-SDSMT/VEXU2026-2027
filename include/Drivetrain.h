@@ -38,17 +38,11 @@ struct DriveDirection {
   double headingDegs;
 };
 
-struct DriveDistance {
-  double distancIn;
-  double accumulatedDistIn;
-};
-
 struct TurnHeading {
   double desiredHeadingDegs;
 };
 
-using State = std::variant<Idle, DriveVoltage, DriveDirection, DriveDistance,
-                           TurnHeading>;
+using State = std::variant<Idle, DriveVoltage, DriveDirection, TurnHeading>;
 }  // namespace States
 
 /**
@@ -75,7 +69,7 @@ class Drivetrain {
    * @param wheelDiameter Wheel diameter in inches, default 2.25 inches
    */
   Drivetrain(pros::MotorGroup* leftMotors, pros::MotorGroup* rightMotors,
-             pros::Rotation* xOdomRotationSensor, pros::Imu* imu,
+             pros::Rotation* xOdomRotationSensor, pros::GPS* Gps,
              double gearRatio = 1.0, double wheelDiameter = 2.25,
              double odomWheelDiameterInches = 2.0);
 
@@ -84,13 +78,6 @@ class Drivetrain {
   void initPose(double x_meters, double y_meters, double theta_degs);
 
   void setState(States::State s);
-
-  /**
-   * @brief Initializes drivetrain components (call once in init function)
-   *
-   * Resets the IMU to establish the initial heading reference.
-   */
-  void init() { m_imu->reset(true); };
 
   /**
    * @brief Applies a voltage cap to limit maximum motor output
@@ -152,8 +139,8 @@ class Drivetrain {
   double odomWheelDiameterInches = 2.0;
   pros::Rotation* m_xOdomRotationSensor;
 
-  /** Pointer to inertial measurement unit (IMU) for heading/gyro feedback */
-  pros::Imu* m_imu;
+  /** Pointer to GPS for heading/gyro feedback */
+  pros::GPS* m_gps;
 
   // ==================== PID Controllers ====================
 
@@ -178,9 +165,7 @@ class Drivetrain {
   // const int NZ = 3;  // measurements
   double poseEstXM = 0.0;
   double poseEstYM = 0.0;
-  double headingOffRads = 0.0;
-
-  void getNewStateForFilter(Eigen::VectorXd& z);
+  double headingRads = 0.0;
 
   static double degsToRads(double degs);
   static double wrapPi(double a);

@@ -42,7 +42,7 @@ const double GPS_LEFT_X_OFF = 0.0;
 const double GPS_LEFT_Y_OFF = 0.0;
 
 // Inertial
-const inline uint8_t Inertial = 2;
+const inline uint8_t gps = 2;
 
 // Intake Motors
 const inline int8_t IN1 = 8;
@@ -89,7 +89,7 @@ inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
 // Sensors
 //===============================================
 
-inline pros::Imu Imu(Inertial);
+inline pros::GPS Gps(gps);
 
 inline pros::Rotation xEncoder(XENC);
 
@@ -105,4 +105,4 @@ inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
 // Drivetrain
 //===============================================
 
-inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
+inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Gps);
