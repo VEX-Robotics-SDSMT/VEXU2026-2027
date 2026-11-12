@@ -16,6 +16,10 @@ namespace Drivetrain {
 // pros::MotorGroup m_rightMotors;
 // Mines::PID m_drivePID;
 // Mines::PID m_turnPID;
+// pros::MotorGroup m_leftMotors;
+// pros::MotorGroup m_rightMotors;
+// Mines::PID m_drivePID;
+// Mines::PID m_turnPID;
 
 Drivetrain::Drivetrain(pros::MotorGroup* leftMotors,
                        pros::MotorGroup* rightMotors,

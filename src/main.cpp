@@ -2,7 +2,6 @@
 
 #include "autos.h"
 #include "devices.h"
-
 /**
  * A callback function for LLEMU's center button.
  *
@@ -28,7 +27,10 @@ void on_center_button() {
 void initialize() {
   pros::lcd::initialize();
   pros::lcd::set_text(1, "Hello PROS User!");
+  // pros::lcd::initialize();
+  // pros::lcd::set_text(1, "Hello PROS User!");
 
+  // pros::lcd::register_btn1_cb(on_center_button);
   pros::lcd::register_btn1_cb(on_center_button);
 }
 
@@ -95,10 +97,21 @@ void opcontrol() {
       quadrant1(drive);
     } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1)) {
-      quadrant1MatchLoadScoreCycle(drive, [&]() {
-        return master.get_digital(
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1);
-      });
+      intake.outtake();
+      // quadrant1MatchLoadScoreCycle(drive, [&]() {
+      //   return master.get_digital(
+      //       pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1);
+      // });
+    } else if (master.get_digital_new_press(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R2)) {
+      intake.toggleExtended();
+    } else if (master.get_digital_new_press(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
+      intake.startWheels();
+
+    } else if (master.get_digital(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
+      intake.stopWheels();
     } else {
       int dr = master.get_analog(
           ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
@@ -109,7 +122,8 @@ void opcontrol() {
                                            [dr, turn]() { return dr - turn; }));
     }
 
-    drive.periodic();
+    // drive.periodic();
+    intake.periodic();
 
     pros::delay(DT_S * 1000.0);  // Run for 20 ms then update
   }

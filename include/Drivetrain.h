@@ -2,6 +2,7 @@
  * @file Drivetrain.h
  * @brief Drivetrain control system for VEX robot movement and turning
  *
+ *
  * This module provides closed-loop control for robot drivetrain movement,
  * including distance driving and heading-based turning using PID controllers.
  */
@@ -47,6 +48,9 @@ using State = std::variant<Idle, DriveVoltage, DriveDirection, TurnHeading>;
 
 /**
  * @class Drivetrain
+ * @brief Manages differential drive movement with PID-based position and
+ * heading control
+ *
  * @brief Manages differential drive movement with PID-based position and
  * heading control
  *
@@ -98,19 +102,6 @@ class Drivetrain {
   void setDrivePID(double kp, double ki, double kd, double integralLim) {
     m_drivePID.setTunings(kp, ki, kd);
     m_drivePID.setIntegralLimit(integralLim);
-  };
-
-  /**
-   * @brief Configures the PID tuning parameters for heading/turn control
-   *
-   * @param kp Proportional gain coefficient
-   * @param ki Integral gain coefficient
-   * @param kd Derivative gain coefficient
-   * @param integralLim Integral accumulation limit for anti-windup protection
-   */
-  void setTurnPID(double kp, double ki, double kd, double integralLim) {
-    m_turnPID.setTunings(kp, ki, kd);
-    m_turnPID.setIntegralLimit(integralLim);
   };
 
   void poseReset();

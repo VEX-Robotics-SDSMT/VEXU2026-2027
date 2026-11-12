@@ -39,7 +39,7 @@ void quadrant1(Drivetrain::Drivetrain& drive) {
 
       case 3:
         drive.poseReset();
-        drive.setState(Drivetrain::States::DriveDirection(12.0, 35.0));
+        drive.setState(Drivetrain::States::DriveDirection(14.0, 65.0));
         count++;
         break;
 
@@ -53,7 +53,7 @@ void quadrant1(Drivetrain::Drivetrain& drive) {
         drive.setState(Drivetrain::States::DriveVoltage(
             []() { return -50.0; }, []() { return -50.0; }));
         counter++;
-        if (counter >= 0.375 / DT_S) {
+        if (counter >= 0.4 / DT_S) {
           count++;
           counter = 0;
         }
@@ -172,11 +172,12 @@ void quadrant1MatchLoadScoreCycle(Drivetrain::Drivetrain& drive,
       case 5:
         // intentional no-reset here because it should bring us back to the 12
         // inch line we started at
-        // drive.setState(Drivetrain::States::DriveDirection(1.0, 0.0));
+        // drive.setState(Drivetrain::States::DriveDirection(6.0, 0.0));
+
         drive.setState(Drivetrain::States::DriveVoltage([]() { return 50.0; },
                                                         []() { return 50.0; }));
         counter++;
-        if (counter >= 0.5 / DT_S) {
+        if (counter >= 0.75 / DT_S) {
           count++;
           counter = 0;
           drive.setState(Drivetrain::States::Idle{});
@@ -190,7 +191,7 @@ void quadrant1MatchLoadScoreCycle(Drivetrain::Drivetrain& drive,
         break;
 
       case 7:
-        drive.setState(Drivetrain::States::DriveDirection(15, 135));
+        drive.setState(Drivetrain::States::TurnHeading(-90));
         count++;
         break;
 
@@ -201,11 +202,23 @@ void quadrant1MatchLoadScoreCycle(Drivetrain::Drivetrain& drive,
         break;
 
       case 9:
-      //
+        drive.setState(Drivetrain::States::DriveDirection(35, -90));
+        count++;
+        break;
+
       case 10:
+        if (drive.isIdle()) {
+          count++;
+        }
+        break;
+
       case 11:
+      //
       case 12:
       case 13:
+      case 14:
+      case 15:
+        count++;
         break;
 
       default:
