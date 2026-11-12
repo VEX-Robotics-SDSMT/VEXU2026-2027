@@ -42,7 +42,7 @@ const double GPS_LEFT_X_OFF = 0.0;
 const double GPS_LEFT_Y_OFF = 0.0;
 
 // Inertial
-const inline uint8_t gps = 2;
+const inline uint8_t imu = 19;
 
 // Intake Motors
 const inline int8_t IN1 = 8;
@@ -54,14 +54,14 @@ const inline int8_t LIFTMOTOR2 = 1;
 const inline int8_t LIFTENC = 1;
 
 // Encoder
-const inline int8_t XENC = 1;
+const inline int8_t XENC = 4;
 
 // Loader
 const inline int8_t L1 = 1;
 const inline int8_t L2 = 1;
 
 // Pneumatics
-const inline char INTAKELIFT = 'A';
+const inline char INTAKELIFT = 'B';
 const inline char SCOREARM = 'A';
 
 #endif
@@ -89,7 +89,7 @@ inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
 // Sensors
 //===============================================
 
-inline pros::GPS Gps(gps);
+inline pros::IMU Imu(imu);
 
 inline pros::Rotation xEncoder(XENC);
 
@@ -105,4 +105,4 @@ inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
 // Drivetrain
 //===============================================
 
-inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Gps);
+inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);

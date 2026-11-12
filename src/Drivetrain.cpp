@@ -19,19 +19,18 @@ namespace Drivetrain {
 
 Drivetrain::Drivetrain(pros::MotorGroup* leftMotors,
                        pros::MotorGroup* rightMotors,
-                       pros::Rotation* xOdomRotationSensor, pros::GPS* Gps,
+                       pros::Rotation* xOdomRotationSensor, pros::IMU* Imu,
                        double gearRatio, double wheelDiameter,
                        double odomWheelDiameterInches)
     : m_drivePID(145, 0.000, 0.00, 20),
-      m_turnPID(65, 0.0, 0.00, 20),
+      m_turnPID(63, 0.0, 0.00, 20),
       m_leftMotors(leftMotors),
       m_rightMotors(rightMotors),
       m_xOdomRotationSensor(xOdomRotationSensor),
-      m_gps(Gps),
+      m_imu(Imu),
       m_gearRatio(gearRatio),
       m_wheelDiameter(wheelDiameter),
       odomWheelDiameterInches(odomWheelDiameterInches) {
-  m_gps->initialize_full(0.0, 0.0, 0.0, 0.0, 0.0);
   leftMotors->set_brake_mode_all(
       pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_BRAKE);
   rightMotors->set_brake_mode_all(
@@ -44,9 +43,9 @@ void Drivetrain::periodic() {
   // poseFilter.update(z);
 
   // Eigen::VectorXd state = poseFilter.state();
-  double rate = m_gps->get_gyro_rate_z();
+  double rate = m_imu->get_gyro_rate().z;
   if (!isinf(rate)) {
-    headingRads += degsToRads(rate) * DT_S;
+    headingRads -= degsToRads(rate) * DT_S;
   }
 
   double vF = m_xOdomRotationSensor->get_velocity() / 3600.0 * M_PI *
@@ -100,7 +99,7 @@ void Drivetrain::periodic() {
           driveVoltage(drive - turn, drive + turn);
 
           if (std::abs(distTraveled - inchesToMeters(s.distIn)) <= 0.1 &&
-              std::abs(0) <= M_PI / 4.0) {
+              std::abs(err) <= M_PI / 4.0) {
             setState(States::Idle{});
           }
         } else if constexpr (std::is_same_v<T, States::TurnHeading>) {
@@ -109,8 +108,7 @@ void Drivetrain::periodic() {
           m_turnPID.setTarget(0);
           double calc = m_turnPID.calculate(err);
           driveVoltage(-calc, calc);
-          if (std::abs(err) <= M_PI / 16) {
-            std::cout << "Turn finished, => IDLE\n";
+          if (std::abs(err) <= M_PI / 4) {
             setState(States::Idle{});
           }
         } else {
@@ -157,6 +155,8 @@ void Drivetrain::poseReset() {
 
   // poseFilter.init();
 }
+
+void Drivetrain::resetIMU() { m_imu->reset(); }
 
 bool Drivetrain::isIdle() {
   return std::holds_alternative<States::Idle>(currState);

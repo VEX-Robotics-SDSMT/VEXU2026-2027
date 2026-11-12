@@ -69,7 +69,7 @@ class Drivetrain {
    * @param wheelDiameter Wheel diameter in inches, default 2.25 inches
    */
   Drivetrain(pros::MotorGroup* leftMotors, pros::MotorGroup* rightMotors,
-             pros::Rotation* xOdomRotationSensor, pros::GPS* Gps,
+             pros::Rotation* xOdomRotationSensor, pros::IMU* Imu,
              double gearRatio = 1.0, double wheelDiameter = 2.25,
              double odomWheelDiameterInches = 2.0);
 
@@ -117,6 +117,8 @@ class Drivetrain {
 
   bool isIdle();
 
+  void resetIMU();
+
  private:
   void driveVoltage(int32_t leftVoltage, int32_t rightVoltage);
 
@@ -139,8 +141,8 @@ class Drivetrain {
   double odomWheelDiameterInches = 2.0;
   pros::Rotation* m_xOdomRotationSensor;
 
-  /** Pointer to GPS for heading/gyro feedback */
-  pros::GPS* m_gps;
+  /** Pointer to IMU for heading/gyro feedback */
+  pros::IMU* m_imu;
 
   // ==================== PID Controllers ====================
 
