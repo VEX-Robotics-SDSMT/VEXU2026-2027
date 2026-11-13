@@ -11,6 +11,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#pragma once
 
 #ifndef _PROS_MAIN_H_
 #define _PROS_MAIN_H_
@@ -34,8 +35,8 @@
  */
 #define PROS_USE_LITERALS
 
-#include "api.h"
 #include "MinesLib.h"
+#include "api.h"
 #include "devices.h"
 
 /**

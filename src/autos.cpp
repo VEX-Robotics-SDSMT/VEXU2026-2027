@@ -39,7 +39,7 @@ void quadrant1(Drivetrain::Drivetrain& drive) {
 
       case 3:
         drive.poseReset();
-        drive.setState(Drivetrain::States::DriveDirection(14.0, 65.0));
+        drive.setState(Drivetrain::States::DriveDirection(14.0, 45.0));
         count++;
         break;
 

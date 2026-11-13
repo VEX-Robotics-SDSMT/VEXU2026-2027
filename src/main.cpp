@@ -84,34 +84,30 @@ void opcontrol() {
   while (true) {
     if (master.get_digital(
             pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
-      drive.setState(Drivetrain::States::DriveDirection(12.0, 0.0));
-
+      endeffector.setState(EndEffector::State::SCORING);
     } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
-      drive.setState(Drivetrain::States::TurnHeading(90.0));
+      endeffector.setState(EndEffector::State::READY);
     } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
-      drive.poseReset();
+      quadrant1(drive);
     } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
-      quadrant1(drive);
     } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1)) {
       intake.outtake();
-      // quadrant1MatchLoadScoreCycle(drive, [&]() {
-      //   return master.get_digital(
-      //       pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1);
-      // });
     } else if (master.get_digital_new_press(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R2)) {
       intake.toggleExtended();
     } else if (master.get_digital_new_press(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
       intake.startWheels();
+      endeffector.setState(EndEffector::State::INTAKING_RETRACTED);
 
     } else if (master.get_digital(
                    pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
       intake.stopWheels();
+      endeffector.setState(EndEffector::State::RETRACTED);
     } else {
       int dr = master.get_analog(
           ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
@@ -122,8 +118,9 @@ void opcontrol() {
                                            [dr, turn]() { return dr - turn; }));
     }
 
-    // drive.periodic();
+    drive.periodic();
     intake.periodic();
+    endeffector.periodic();
 
     pros::delay(DT_S * 1000.0);  // Run for 20 ms then update
   }

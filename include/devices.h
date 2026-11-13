@@ -1,5 +1,6 @@
 #pragma once
 #include "Drivetrain.h"
+#include "endeffector.h"
 #include "intake.h"
 #include "pros/adi.hpp"
 #include "pros/gps.hpp"
@@ -39,6 +40,9 @@ const inline uint8_t imu = 19;
 const inline int8_t IN1 = 8;
 const inline int8_t IN2 = 10;
 
+// Score Motors
+const inline uint8_t SCORE1 = 2;
+
 // Lift Motors
 const inline int8_t LIFTMOTOR1 = 1;
 const inline int8_t LIFTMOTOR2 = 1;
@@ -64,7 +68,7 @@ const inline char SCOREARM = 'B';
 // Drive Train Motors
 inline pros::MotorGroup leftMotors({-LM1, LM2, -LM3, LM4,
                                     -LM5});  //, -LM2, -LM3, -LM4, -LM5});
-inline pros::MotorGroup rightMotors({RM1, -RM2, -RM3, LM4,
+inline pros::MotorGroup rightMotors({RM1, -RM2, -RM3, RM4,
                                      RM5});  //, RM2, RM3, RM4, RM5});
 
 // Intake Motors
@@ -75,6 +79,8 @@ inline pros::MotorGroup loaders({L1, -L2});
 
 // Elevator Motors
 inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
+// Score Motors
+inline pros::MotorGroup scoreMotors({SCORE1});
 
 //===============================================
 // Sensors
@@ -91,9 +97,13 @@ inline pros::Rotation liftEncoder(LIFTENC);
 //===============================================
 inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, false);
 
+inline pros::adi::Pneumatics scoreFlipperPneumatics(SCOREARM, false);
+
 //===============================================
 // Drivetrain
 //===============================================
 
 inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
 inline Intake::Intake intake(&intakePneumatics, &intakeMotors);
+inline EndEffector::EndEffector endeffector(&scoreFlipperPneumatics,
+                                            &scoreMotors);

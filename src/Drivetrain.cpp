@@ -103,16 +103,15 @@ void Drivetrain::periodic() {
           driveVoltage(drive - turn, drive + turn);
 
           if (std::abs(distTraveled - inchesToMeters(s.distIn)) <= 0.1 &&
-              std::abs(err) <= M_PI / 4.0) {
+              std::abs(err) <= M_PI / 8.0) {
             setState(States::Idle{});
           }
         } else if constexpr (std::is_same_v<T, States::TurnHeading>) {
           double err = wrapPi(degsToRads(s.desiredHeadingDegs) - headingRads);
-          std::cout << "Turn Heading " << err << ' ' << M_PI / 16 << '\n';
           m_turnPID.setTarget(0);
           double calc = m_turnPID.calculate(err);
           driveVoltage(-calc, calc);
-          if (std::abs(err) <= M_PI / 4) {
+          if (std::abs(err) <= M_PI / 8.0) {
             setState(States::Idle{});
           }
         } else {
@@ -160,7 +159,7 @@ void Drivetrain::poseReset() {
   // poseFilter.init();
 }
 
-void Drivetrain::resetIMU() { m_imu->reset(); }
+void Drivetrain::resetIMU() { m_imu->reset(true); }
 
 bool Drivetrain::isIdle() {
   return std::holds_alternative<States::Idle>(currState);
