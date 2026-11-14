@@ -6,6 +6,8 @@ AutoManager::AutoManager(std::vector<AutoCommand> commands)
 
 void AutoManager::reset() { idx = 0; }
 
+void AutoManager::initialize() { m_commands[0].initialize(); }
+
 void AutoManager::periodic() {
   if (idx < m_commands.size()) {
     m_commands[idx].periodic();
@@ -17,4 +19,6 @@ void AutoManager::periodic() {
     }
   }
 }
+
+bool AutoManager::isFinished() { return idx >= m_commands.size(); }
 }  // namespace AutoManager

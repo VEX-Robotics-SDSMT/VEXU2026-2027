@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <tuple>
 #include <vector>
 
 namespace AutoManager {
@@ -14,8 +13,10 @@ struct AutoCommand {
 class AutoManager {
  public:
   AutoManager(std::vector<AutoCommand> commands);
+  void initialize();
   void periodic();
   void reset();
+  bool isFinished();
 
  private:
   size_t idx;

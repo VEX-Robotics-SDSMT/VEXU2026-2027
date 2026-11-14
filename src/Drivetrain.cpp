@@ -27,7 +27,7 @@ Drivetrain::Drivetrain(pros::MotorGroup* leftMotors,
                        double gearRatio, double wheelDiameter,
                        double odomWheelDiameterInches)
     : m_drivePID(145, 0.000, 0.00, 20),
-      m_turnPID(63, 0.0, 0.00, 20),
+      m_turnPID(100, 0.0, 0.002, 20),
       m_leftMotors(leftMotors),
       m_rightMotors(rightMotors),
       m_xOdomRotationSensor(xOdomRotationSensor),
@@ -42,11 +42,6 @@ Drivetrain::Drivetrain(pros::MotorGroup* leftMotors,
 }
 
 void Drivetrain::periodic() {
-  // Eigen::VectorXd z = Eigen::VectorXd::Zero(NZ);
-  // getNewStateForFilter(z);
-  // poseFilter.update(z);
-
-  // Eigen::VectorXd state = poseFilter.state();
   double rate = m_imu->get_gyro_rate().z;
   if (!isinf(rate)) {
     headingRads -= degsToRads(rate) * DT_S;
@@ -82,7 +77,9 @@ void Drivetrain::periodic() {
           // for an example of what this means
           std::cout << "drive direction\n";
 
-          double err = wrapPi(degsToRads(s.headingDegs) - headingRads);
+          double err = degsToRads(s.headingDegs) -
+                       headingRads;  // wrapPi(degsToRads(s.headingDegs)
+                                     // - headingRads);
           double distTraveled = std::hypot(x_m, y_m);
 
           // this solves some issues of what we do at something like being at
@@ -96,14 +93,12 @@ void Drivetrain::periodic() {
 
           double drive = m_drivePID.calculate(distTraveled);
 
-          std::cout << distTraveled << ' ' << inchesToMeters(s.distIn) << '\n';
-
           drive *= std::cos(err);
 
           driveVoltage(drive - turn, drive + turn);
 
           if (std::abs(distTraveled - inchesToMeters(s.distIn)) <= 0.1 &&
-              std::abs(err) <= M_PI / 8.0) {
+              std::abs(err) <= M_PI / 35) {
             setState(States::Idle{});
           }
         } else if constexpr (std::is_same_v<T, States::TurnHeading>) {
@@ -111,35 +106,20 @@ void Drivetrain::periodic() {
           m_turnPID.setTarget(0);
           double calc = m_turnPID.calculate(err);
           driveVoltage(-calc, calc);
-          if (std::abs(err) <= M_PI / 8.0) {
+          if (std::abs(err) <= M_PI / 35) {
             setState(States::Idle{});
           }
         } else {
-          // unreachable
+          // should be unreachable
           std::cout << "Bad\n";
         }
       },
       currState);
 }
 
-void Drivetrain::setState(States::State s) {
-  // if (std::holds_alternative<States::DriveDirection>(s) &&
-  //     !std::holds_alternative<States::DriveDirection>(currState)) {
-  //   m_drivePID.reset();
-  //   m_turnPID.reset();
-  //   poseReset();
-  // } else if (std::holds_alternative<States::TurnHeading>(s) &&
-  //            !std::holds_alternative<States::DriveDirection>(currState)) {
-  //   m_turnPID.reset();
-  //   poseReset();
-  // }
-  currState = std::move(s);
-}
+void Drivetrain::setState(States::State s) { currState = std::move(s); }
 
 void Drivetrain::initPose(double x_meters, double y_meters, double theta_degs) {
-  // Eigen::VectorXd x0 = Eigen::VectorXd::Zero(NX);
-  // x0 << x_meters, y_meters, degsToRads(theta_degs), 0.0, 0.0, 0.0;
-  // poseFilter.init(0.0, x0);
   poseEstXM = x_meters;
   poseEstYM = y_meters;
   headingRads = degsToRads(theta_degs);
@@ -150,14 +130,7 @@ void Drivetrain::driveVoltage(int32_t leftVoltage, int32_t rightVoltage) {
   m_rightMotors->move(rightVoltage);
 }
 
-void Drivetrain::poseReset() {
-  initPose(0, 0, 0);
-  // Eigen::MatrixXd x0 = Eigen::VectorXd::Zero(NX);
-  // auto currPose = poseFilter.state();
-  // x0 << 0.0, 0.0, degsToRads(m_imu->get_heading());
-
-  // poseFilter.init();
-}
+void Drivetrain::poseReset() { initPose(0, 0, 0); }
 
 void Drivetrain::resetIMU() { m_imu->reset(true); }
 
@@ -178,5 +151,4 @@ double Drivetrain::dist(double x1, double y1, double x2, double y2) {
 }
 
 double Drivetrain::inchesToMeters(double in) { return in * 0.0254; }
-
 }  // namespace Drivetrain

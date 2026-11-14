@@ -1,232 +1,98 @@
 #include "autos.h"
 
+#include "autoManager.hpp"
 #include "main.h"
 
+AutoManager::AutoCommand driveVoltageTime(int32_t left, int32_t right,
+                                          double time_s);
+
+AutoManager::AutoCommand driveDirection(double distance_in,
+                                        double directionDegs);
+
+AutoManager::AutoCommand turnBy(double direction_degs);
+AutoManager::AutoCommand waitFor(double time_s);
+
 void quadrant1(Drivetrain::Drivetrain& drive) {
-  unsigned short count = 0;
-  unsigned short counter = 0;
-  while (true) {
-    switch (count) {
-      case 0:
-        drive.setState(Drivetrain::States::DriveVoltage(
-            []() { return -50.0; }, []() { return -50.0; }));
-        counter++;
-        if (counter >= 0.25 / DT_S) {
-          count++;
-          counter = 0;
-        }
-        break;
-
-      case 1:
-        drive.setState(Drivetrain::States::DriveVoltage([]() { return 50.0; },
-                                                        []() { return 50.0; }));
-        counter++;
-        if (counter >= 0.25 / DT_S) {
-          count++;
-          counter = 0;
-        }
-        break;
-
-      case 2:
-        drive.setState(Drivetrain::States::DriveVoltage(
-            []() { return -50.0; }, []() { return -50.0; }));
-        counter++;
-        if (counter >= 0.5 / DT_S) {
-          count++;
-          counter = 0;
-        }
-        break;
-
-      case 3:
-        drive.poseReset();
-        drive.setState(Drivetrain::States::DriveDirection(14.0, 45.0));
-        count++;
-        break;
-
-      case 4:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 5:
-        drive.setState(Drivetrain::States::DriveVoltage(
-            []() { return -50.0; }, []() { return -50.0; }));
-        counter++;
-        if (counter >= 0.4 / DT_S) {
-          count++;
-          counter = 0;
-        }
-        break;
-
-      case 6:
-        drive.setState(Drivetrain::States::TurnHeading(90.0));
-        count++;
-        break;
-
-      case 7:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 8:
-        drive.poseReset();
-        drive.setState(Drivetrain::States::DriveDirection(48.0, 0));
-        count++;
-        break;
-
-      case 9:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 10:
-        drive.setState(Drivetrain::States::TurnHeading(-90.0));
-        count++;
-        break;
-
-      case 11:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 12:
-      case 13:
-      case 14:
-      case 15:
-      case 16:
-        quadrant1MatchLoadScoreCycle(drive);
-        count++;
-        break;
-
-      default:
-        drive.setState(Drivetrain::States::Idle{});
-        drive.periodic();
-        return;
-    }
+  AutoManager::AutoManager manager = AutoManager::AutoManager({
+      // driveVoltageTime(75, 75, 0.7),
+      // driveVoltageTime(-127, -127, 1.5),
+      // driveVoltageTime(35, 35, 0.35),
+      // driveVoltageTime(-45, -45, 0.5),
+      // driveVoltageTime(35, 35, 0.35),
+      // driveVoltageTime(-45, -45, 0.5),
+      // driveVoltageTime(35, 35, 0.35),
+      turnBy(50),
+      driveDirection(12, 0),
+      driveVoltageTime(35, 35, 0.35),
+      waitFor(0.25),
+      driveVoltageTime(-55, -55, 0.5),
+      waitFor(0.25),
+      turnBy(40),
+      driveDirection(40, 0),
+      turnBy(-45),
+      driveDirection(17, 0),
+      turnBy(-45),
+      driveVoltageTime(-40, -40, 2),
+      driveVoltageTime(30, 30, 0.375),
+      driveVoltageTime(-30, -30, 0.375),
+      driveDirection(18, 0),
+      turnBy(-90),
+      driveDirection(18, 0),
+      driveVoltageTime(35, 35, 1.25),
+  });
+  manager.initialize();
+  while (!manager.isFinished()) {
+    manager.periodic();
     drive.periodic();
     pros::delay(DT_S * 1000.0);
   }
 }
 
-void quadrant1MatchLoadScoreCycle(Drivetrain::Drivetrain& drive,
-                                  std::function<bool(void)> run) {
-  // TODO: There are other subsystems that have to be added here once everything
-  // is merged. Approximate function calls are included as is reasonable
-  unsigned short count = 0;
-  unsigned short counter = 0;
-  while (run()) {
-    switch (count) {
-      case 0:
-        // intake->retract();
-        // intake->setWheels(true);
-        count++;
-        break;
+AutoManager::AutoCommand driveVoltageTime(int32_t left, int32_t right,
+                                          double time_s) {
+  std::shared_ptr<int> counter = std::make_shared<int>(0);
+  return {[left, right]() {
+            drive.setState(Drivetrain::States::DriveVoltage(
+                [left]() { return left; }, [right]() { return right; }));
+          },
+          [counter]() { (*counter)++; },
+          [counter, time_s]() {
+            if ((*counter) >= time_s / DT_S) {
+              *counter = 0;
+              drive.setState(Drivetrain::States::Idle{});
+              return true;
+            }
+            return false;
+          }};
+}
 
-      case 1:
-        drive.poseReset();
-        drive.setState(Drivetrain::States::DriveVoltage(
-            []() { return -50.0; }, []() { return -50.0; }));
-        counter++;
-        if (counter >= 0.5 / DT_S) {
-          count++;
-          counter = 0;
-          drive.setState(Drivetrain::States::Idle{});
-        }
-        break;
+AutoManager::AutoCommand driveDirection(double distance_in,
+                                        double direction_degs) {
+  return {[distance_in, direction_degs]() {
+            drive.poseReset();
+            drive.setState(Drivetrain::States::DriveDirection(distance_in,
+                                                              direction_degs));
+          },
+          []() {}, []() { return drive.isIdle(); }};
+}
 
-        // drive.poseReset();
-        // drive.setState(Drivetrain::States::DriveDirection(-8.0, 0.0));
-        // count++;
-        // break;
+AutoManager::AutoCommand turnBy(double direction_degs) {
+  return {[direction_degs]() {
+            drive.poseReset();
+            drive.setState(Drivetrain::States::TurnHeading(direction_degs));
+          },
+          []() {}, []() { return drive.isIdle(); }};
+}
 
-      case 2:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 3:
-        drive.setState(Drivetrain::States::DriveVoltage(
-            []() { return -25.0; }, []() { return -25.0; }));
-        counter++;
-        if (counter >= 0.5 / DT_S) {
-          count++;
-          counter = 0;
-        }
-        break;
-
-      case 4:
-        drive.setState(Drivetrain::States::DriveVoltage([]() { return 25.0; },
-                                                        []() { return 25.0; }));
-        counter++;
-        if (counter >= 0.25 / DT_S) {
-          count++;
-          counter = 0;
-        }
-        break;
-
-      case 5:
-        // intentional no-reset here because it should bring us back to the 12
-        // inch line we started at
-        // drive.setState(Drivetrain::States::DriveDirection(6.0, 0.0));
-
-        drive.setState(Drivetrain::States::DriveVoltage([]() { return 50.0; },
-                                                        []() { return 50.0; }));
-        counter++;
-        if (counter >= 0.75 / DT_S) {
-          count++;
-          counter = 0;
-          drive.setState(Drivetrain::States::Idle{});
-        }
-        break;
-
-      case 6:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 7:
-        drive.setState(Drivetrain::States::TurnHeading(-90));
-        count++;
-        break;
-
-      case 8:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 9:
-        drive.setState(Drivetrain::States::DriveDirection(35, -90));
-        count++;
-        break;
-
-      case 10:
-        if (drive.isIdle()) {
-          count++;
-        }
-        break;
-
-      case 11:
-      //
-      case 12:
-      case 13:
-      case 14:
-      case 15:
-        count++;
-        break;
-
-      default:
-        drive.setState(Drivetrain::States::Idle{});
-        drive.periodic();
-        return;
-    }
-    drive.periodic();
-    pros::delay(DT_S * 1000.0);
-  }
+AutoManager::AutoCommand waitFor(double time_s) {
+  std::shared_ptr<int> counter = std::make_shared<int>(0);
+  return {[]() {}, [counter]() { (*counter)++; },
+          [counter, time_s]() {
+            if ((*counter) >= time_s / DT_S) {
+              *counter = 0;
+              drive.setState(Drivetrain::States::Idle{});
+              return true;
+            }
+            return false;
+          }};
 }
