@@ -81,46 +81,60 @@ void autonomous() { quadrant1(drive); }
 void opcontrol() {
   pros::Controller master(pros::E_CONTROLLER_MASTER);
 
+  double set = 0;
   while (true) {
-    if (master.get_digital(
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
-      endeffector.setState(EndEffector::State::SCORING);
-    } else if (master.get_digital(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
-      endeffector.setState(EndEffector::State::READY);
-    } else if (master.get_digital(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
-      quadrant1(drive);
-    } else if (master.get_digital(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
-    } else if (master.get_digital(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1)) {
-      intake.outtake();
-    } else if (master.get_digital_new_press(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R2)) {
-      intake.toggleExtended();
-    } else if (master.get_digital_new_press(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
-      intake.startWheels();
-      endeffector.setState(EndEffector::State::INTAKING_RETRACTED);
+    // if (master.get_digital(
+    //         pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
+    //   endeffector.setState(EndEffector::State::SCORING);
+    // } else if (master.get_digital(
+    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
+    //   endeffector.setState(EndEffector::State::READY);
+    // } else if (master.get_digital(
+    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
+    //   quadrant1(drive);
+    // } else if (master.get_digital(
+    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
+    // } else if (master.get_digital(
+    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1)) {
+    //   intake.outtake();
+    // } else if (master.get_digital_new_press(
+    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R2)) {
+    //   intake.toggleExtended();
+    // } else if (master.get_digital_new_press(
+    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
+    //   intake.startWheels();
+    //   endeffector.setState(EndEffector::State::INTAKING_RETRACTED);
 
-    } else if (master.get_digital(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
-      intake.stopWheels();
-      endeffector.setState(EndEffector::State::RETRACTED);
-    } else {
-      int dr = master.get_analog(
-          ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
-      int turn = master.get_analog(
-          ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-      drive.setState(
-          Drivetrain::States::DriveVoltage([dr, turn]() { return dr + turn; },
-                                           [dr, turn]() { return dr - turn; }));
+    // } else if (master.get_digital(
+    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
+    //   intake.stopWheels();
+    //   endeffector.setState(EndEffector::State::RETRACTED);
+    // } else {
+    //   int dr = master.get_analog(
+    //       ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
+    //   int turn = master.get_analog(
+    //       ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
+    //   drive.setState(
+    //       Drivetrain::States::DriveVoltage([dr, turn]() { return dr + turn;
+    //       },
+    //                                        [dr, turn]() { return dr - turn;
+    //                                        }));
+    // }
+
+    if (master.get_digital_new_press(
+            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
+      set += 1.0;
+    } else if (master.get_digital_new_press(
+                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
+      set -= 1.0;
     }
 
-    drive.periodic();
-    intake.periodic();
-    endeffector.periodic();
+    // drive.periodic();
+    // intake.periodic();
+    // endeffector.periodic();
+    lift.periodic(
+    master.get_analog(pros::controller_analog_e_t::E_CONTROLLER_ANALOG_LEFT_Y)
+    );
 
     pros::delay(DT_S * 1000.0);  // Run for 20 ms then update
   }

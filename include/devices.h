@@ -2,6 +2,7 @@
 #include "Drivetrain.h"
 #include "endeffector.h"
 #include "intake.h"
+#include "lift.h"
 #include "pros/adi.hpp"
 #include "pros/gps.hpp"
 #include "pros/imu.hpp"
@@ -46,7 +47,7 @@ const inline uint8_t SCORE1 = 2;
 // Lift Motors
 const inline int8_t LIFTMOTOR1 = 1;
 const inline int8_t LIFTMOTOR2 = 18;
-const inline int8_t LIFTENC = 1;
+const inline int8_t LIFTENC = 20;
 
 // Encoder
 const inline int8_t XENC = 4;
@@ -108,3 +109,4 @@ inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
 inline Intake::Intake intake(&intakePneumatics, &intakeMotors);
 inline EndEffector::EndEffector endeffector(&scoreFlipperPneumatics,
                                             &scoreMotors);
+inline Lift::Lift lift(&liftMotors, &liftEncoder);
