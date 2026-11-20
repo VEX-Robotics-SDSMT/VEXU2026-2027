@@ -13,6 +13,8 @@
  */
 #pragma once
 
+#define ROBOT_1
+
 #ifndef _PROS_MAIN_H_
 #define _PROS_MAIN_H_
 
@@ -71,7 +73,7 @@ void disabled(void);
 void competition_initialize(void);
 void opcontrol(void);
 
-#define DT_S 0.1
+#define DT_S 0.02
 #ifdef __cplusplus
 }
 #endif

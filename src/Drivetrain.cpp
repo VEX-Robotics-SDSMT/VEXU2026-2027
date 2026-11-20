@@ -1,26 +1,10 @@
 #include "Drivetrain.h"
 
-#include <math.h>
-
-#include <numbers>
 #include <type_traits>
 
 #include "main.h"
 
 namespace Drivetrain {
-//=======================================
-// Member Variables
-//=======================================
-
-// pros::MotorGroup m_leftMotors;
-// pros::MotorGroup m_rightMotors;
-// Mines::PID m_drivePID;
-// Mines::PID m_turnPID;
-// pros::MotorGroup m_leftMotors;
-// pros::MotorGroup m_rightMotors;
-// Mines::PID m_drivePID;
-// Mines::PID m_turnPID;
-
 Drivetrain::Drivetrain(pros::MotorGroup* leftMotors,
                        pros::MotorGroup* rightMotors,
                        pros::Rotation* xOdomRotationSensor, pros::IMU* Imu,
@@ -56,18 +40,13 @@ void Drivetrain::periodic() {
   const double x_m = poseEstXM;
   const double y_m = poseEstYM;
 
-  std::cout << "x=" << x_m << " y=" << y_m
-            << " th=" << wrapPi(headingRads) * 180.0 / M_PI << std::endl;
-
   // handle the current state
   std::visit(
       [&](const auto& s) {
         using T = typename std::decay<decltype(s)>::type;
         if constexpr (std::is_same_v<T, States::Idle>) {
-          std::cout << "Idle\n";
           driveVoltage(0, 0);
         } else if constexpr (std::is_same_v<T, States::DriveVoltage>) {
-          std::cout << "Drive Voltage\n";
           driveVoltage(s.leftVoltage(), s.rightVoltage());
         } else if constexpr (std::is_same_v<T, States::DriveDirection>) {
           // we use cos compensation to make sure that we don't drive much when
@@ -75,7 +54,6 @@ void Drivetrain::periodic() {
           // see
           // https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html#cosine-compensation
           // for an example of what this means
-          std::cout << "drive direction\n";
 
           double err = degsToRads(s.headingDegs) -
                        headingRads;  // wrapPi(degsToRads(s.headingDegs)
@@ -97,7 +75,7 @@ void Drivetrain::periodic() {
 
           driveVoltage(drive - turn, drive + turn);
 
-          if (std::abs(distTraveled - inchesToMeters(s.distIn)) <= 0.1 &&
+          if (std::abs(distTraveled - inchesToMeters(s.distIn)) <= 0.02 &&
               std::abs(err) <= M_PI / 35) {
             setState(States::Idle{});
           }
@@ -111,7 +89,7 @@ void Drivetrain::periodic() {
           }
         } else {
           // should be unreachable
-          std::cout << "Bad\n";
+          std::cout << "Invalid state reached\n";
         }
       },
       currState);
@@ -137,6 +115,8 @@ void Drivetrain::resetIMU() { m_imu->reset(true); }
 bool Drivetrain::isIdle() {
   return std::holds_alternative<States::Idle>(currState);
 }
+
+double Drivetrain::getDistIn() { return std::hypot(poseEstXM, poseEstYM); }
 
 double Drivetrain::degsToRads(double degs) { return degs * M_PI / 180; }
 

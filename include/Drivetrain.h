@@ -110,6 +110,8 @@ class Drivetrain {
 
   void resetIMU();
 
+  double getDistIn();
+
  private:
   void driveVoltage(int32_t leftVoltage, int32_t rightVoltage);
 

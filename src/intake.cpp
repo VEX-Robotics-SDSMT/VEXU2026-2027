@@ -91,4 +91,8 @@ void Intake::toggleExtended() {
   desiredState = static_cast<State>(static_cast<int>(currState) ^ 0b1);
 }
 
+void Intake::toggleOuttake() {
+  desiredState = static_cast<State>(static_cast<int>(currState) ^ 0b100);
+}
+
 }  // namespace Intake

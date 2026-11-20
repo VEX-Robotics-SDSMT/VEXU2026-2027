@@ -7,8 +7,10 @@ namespace EndEffector {
 enum class State {
   RETRACTED,
   INTAKING_RETRACTED,
+  INTAKING_EXTENDED,
   READY,
   SCORING,
+  DEJAM,
 };
 
 class EndEffector {
@@ -21,6 +23,10 @@ class EndEffector {
 
   State getDesiredState();
   State getCurrState();
+
+  void toggleExtended();
+
+  void toggleDirection();
 
  private:
   const int32_t rollerScoringSpeed = 127;

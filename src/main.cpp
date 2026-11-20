@@ -2,6 +2,8 @@
 
 #include "autos.h"
 #include "devices.h"
+#include "driverBindings.hpp"
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -32,6 +34,7 @@ void initialize() {
 
   // pros::lcd::register_btn1_cb(on_center_button);
   pros::lcd::register_btn1_cb(on_center_button);
+  drive.resetIMU();
 }
 
 /**
@@ -50,7 +53,7 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize() { drive.resetIMU(); }
+void competition_initialize() {}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -63,7 +66,7 @@ void competition_initialize() { drive.resetIMU(); }
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() { quadrant1(drive); }
+void autonomous() { quadrant2Voltage(); }
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -81,60 +84,44 @@ void autonomous() { quadrant1(drive); }
 void opcontrol() {
   pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-  double set = 0;
   while (true) {
-    // if (master.get_digital(
-    //         pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_B)) {
-    //   endeffector.setState(EndEffector::State::SCORING);
-    // } else if (master.get_digital(
-    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
-    //   endeffector.setState(EndEffector::State::READY);
-    // } else if (master.get_digital(
-    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
-    //   quadrant1(drive);
-    // } else if (master.get_digital(
-    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_X)) {
-    // } else if (master.get_digital(
-    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R1)) {
-    //   intake.outtake();
-    // } else if (master.get_digital_new_press(
-    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_R2)) {
-    //   intake.toggleExtended();
-    // } else if (master.get_digital_new_press(
-    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L2)) {
-    //   intake.startWheels();
-    //   endeffector.setState(EndEffector::State::INTAKING_RETRACTED);
-
-    // } else if (master.get_digital(
-    //                pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_L1)) {
-    //   intake.stopWheels();
-    //   endeffector.setState(EndEffector::State::RETRACTED);
-    // } else {
-    //   int dr = master.get_analog(
-    //       ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
-    //   int turn = master.get_analog(
-    //       ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-    //   drive.setState(
-    //       Drivetrain::States::DriveVoltage([dr, turn]() { return dr + turn;
-    //       },
-    //                                        [dr, turn]() { return dr - turn;
-    //                                        }));
-    // }
-
-    if (master.get_digital_new_press(
-            pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_Y)) {
-      set += 1.0;
+    if (master.get_digital_new_press(DriverBindings::toggleIntake)) {
+      intake.toggleWheels();
+    } else if (master.get_digital_new_press(DriverBindings::toggleOuttake)) {
+      intake.toggleOuttake();
+      endeffector.setState(EndEffector::State::DEJAM);
     } else if (master.get_digital_new_press(
-                   pros::controller_digital_e_t::E_CONTROLLER_DIGITAL_A)) {
-      set -= 1.0;
+                   DriverBindings::toggleIntakeRetracted)) {
+      intake.toggleExtended();
     }
 
-    // drive.periodic();
-    // intake.periodic();
-    // endeffector.periodic();
-    lift.periodic(
-    master.get_analog(pros::controller_analog_e_t::E_CONTROLLER_ANALOG_LEFT_Y)
-    );
+    if (master.get_digital(DriverBindings::liftDown)) {
+      lift.setState(Lift::States::Voltage(-80));
+    } else if (master.get_digital(DriverBindings::liftUp)) {
+      lift.setState(Lift::States::Voltage(127));
+    } else {
+      lift.setState(Lift::States::Idle{});
+    }
+
+    if (master.get_digital_new_press(DriverBindings::clawFlipToggle)) {
+      endeffector.toggleExtended();
+    }
+    if (master.get_digital_new_press(DriverBindings::clawScoreToggle)) {
+      endeffector.toggleDirection();
+    }
+
+    int dr = master.get_analog(
+        ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
+    int turn = master.get_analog(
+        ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
+    drive.setState(
+        Drivetrain::States::DriveVoltage([dr, turn]() { return dr + turn; },
+                                         [dr, turn]() { return dr - turn; }));
+
+    drive.periodic();
+    intake.periodic();
+    endeffector.periodic();
+    lift.periodic();
 
     pros::delay(DT_S * 1000.0);  // Run for 20 ms then update
   }

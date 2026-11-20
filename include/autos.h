@@ -14,7 +14,11 @@ void quadrant1MatchLoadScoreCycle(
     Drivetrain::Drivetrain& drive,
     std::function<bool(void)> run = []() { return true; });
 
-void quadrant1(Drivetrain::Drivetrain& drive);
+void quadrant1Voltage();
+void quadrant2Voltage();
+
+void quadrant1(Drivetrain::Drivetrain& drive, Intake::Intake& intake,
+               Lift::Lift& lift, EndEffector::EndEffector& endeffector);
 
 void quadrant2Toggle(Drivetrain::Drivetrain& drive);
 

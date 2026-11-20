@@ -3,6 +3,7 @@
 #include "endeffector.h"
 #include "intake.h"
 #include "lift.h"
+#include "main.h"
 #include "pros/adi.hpp"
 #include "pros/gps.hpp"
 #include "pros/imu.hpp"
@@ -16,9 +17,8 @@ inline pros::Controller master(pros::controller_id_e_t::E_CONTROLLER_MASTER);
 //===============================================
 // Ports
 //===============================================
-#define RobotOne
 
-#ifdef RobotOne
+#ifdef ROBOT_1
 
 // Left Motors
 const inline int8_t LM1 = 14;
@@ -74,13 +74,13 @@ inline pros::MotorGroup leftMotors({-LM1, LM2, -LM3, LM4, -LM5});
 inline pros::MotorGroup rightMotors({RM1, -RM2, -RM3, RM4, RM5});
 
 // Intake Motors
-inline pros::MotorGroup intakeMotors({-IN1, -IN2});
+inline pros::MotorGroup intakeMotors({-IN1, IN2});
 
 // Loader Arm
 inline pros::MotorGroup loaders({L1, -L2});
 
 // Elevator Motors
-inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
+inline pros::MotorGroup liftMotors({-LIFTMOTOR1, LIFTMOTOR2});
 // Score Motors
 inline pros::MotorGroup scoreMotors({SCORE1});
 
