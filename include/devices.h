@@ -82,7 +82,7 @@ inline pros::MotorGroup loaders({L1, -L2});
 // Elevator Motors
 inline pros::MotorGroup liftMotors({LIFTMOTOR1, -LIFTMOTOR2});
 // Score Motors
-inline pros::MotorGroup scoreMotors({SCORE1});
+inline pros::MotorGroup scoreMotors({-SCORE1});
 
 //===============================================
 // Sensors
@@ -107,6 +107,5 @@ inline pros::adi::Pneumatics scoreFlipperPneumatics(SCOREARM, false);
 
 inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
 inline Intake::Intake intake(&intakePneumatics, &intakeMotors);
-inline EndEffector::EndEffector endeffector(&scoreFlipperPneumatics,
-                                            &scoreMotors);
+inline Intake::Intake endeffector(&scoreFlipperPneumatics, &scoreMotors);
 inline Lift::Lift lift(&liftMotors, &liftEncoder);

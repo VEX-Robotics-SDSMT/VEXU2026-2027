@@ -7,8 +7,8 @@ Lift::Lift(pros::MotorGroup* motorGroup, pros::Rotation* rotationSensor)
     : motors(motorGroup),
       rotationSensor(rotationSensor),
       setpointValid(false),
-      positionPID(25.0, 0.0, 0.0) {
-motors->set_brake_mode_all(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
+      positionPID(250.0, 0.0, 0.0) {
+  motors->set_brake_mode_all(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
 };
 
 void Lift::periodic(int32_t volts) {
