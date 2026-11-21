@@ -15,10 +15,10 @@ AutoManager::AutoCommand turnBy(double direction_degs);
 AutoManager::AutoCommand waitFor(double time_s);
 
 AutoManager::AutoCommand setLiftHeight(double inches, bool wait = true);
-AutoManager::AutoCommand setClawState(EndEffector::State state);
 
+#ifdef ROBOT_1
+AutoManager::AutoCommand setEndEffectorState(EndEffector::State state);
 AutoManager::AutoCommand liftClawIntake(bool wait = true);
-
 AutoManager::AutoCommand stationIntake();
 AutoManager::AutoCommand intakeIdle();
 AutoManager::AutoCommand intakeExtended();
@@ -34,18 +34,39 @@ void quadrant1Voltage() {
       driveVoltageTime(35, 35, 0.35),
       driveVoltageTime(-45, -45, 0.5),
       // flip the latch so that the effector deploys properly
-      setClawState(EndEffector::State::INTAKING_RETRACTED),
+      setEndEffectorState(EndEffector::State::INTAKING_RETRACTED),
       // finish toggle
       driveVoltageTime(35, 35, 0.35),
       // point towards the target
       turnBy(60),
       // get ready to score
-      setClawState(EndEffector::State::READY),
-      driveVoltageTime(35, 35, 1.75),
-      setClawState(EndEffector::State::SCORING),
-      waitFor(2),
-      driveVoltageTime(-55, -55, 0.75),
-      setClawState(EndEffector::State::RETRACTED),
+      setEndEffectorState(EndEffector::State::READY),
+      driveVoltageTime(35, 35, 2),
+      setEndEffectorState(EndEffector::State::SCORING),
+      waitFor(1.5),
+      // START NEW STUFF FROM LAST TESTING
+      // drive back from the goal
+      driveDistance(12, -55),
+      // turn towards the right wall
+      turnBy(30),
+      // go to pick up the cup/pin pair standing on the field
+      driveDistance(35, 75),
+      turnBy(-45),
+      setEndEffectorState(EndEffector::State::INTAKING_EXTENDED),
+      setLiftHeight(5, false),
+      driveDistance(13, 35),
+      // actually pick it up
+      setLiftHeight(0, true),
+      setLiftHeight(10, false),
+      // drive back to the goal
+      driveDistance(9, -35),
+      turnBy(-135),
+      driveVoltageTime(45, 45, 2),
+      // score
+      setEndEffectorState(EndEffector::State::SCORING),
+      waitFor(1.5),
+      // done
+      setEndEffectorState(EndEffector::State::RETRACTED),
 
   });
 
@@ -54,42 +75,41 @@ void quadrant1Voltage() {
     manager.periodic();
     drive.periodic();
     endeffector.periodic();
+    lift.periodic();
+    intake.periodic();
     pros::delay(DT_S * 1000.0);
   }
-}
+  for (uint8_t i = 10; i <= 30; i += 10) {
+    AutoManager::AutoManager cycleManager = AutoManager::AutoManager({
+        driveVoltageTime(-30, -30, 0.5),
+        liftClawIntake(),
+        driveDistance(25, -65),
+        turnBy(90),
+        stationIntake(),
+        driveVoltageTime(-60, -60, 2),
+        driveVoltageTime(35, 35, 0.375),
+        intakeExtended(),
+        driveVoltageTime(-35, -35, 0.5),
+        driveDistance(18, 50),
+        turnBy(-90),
+        setEndEffectorState(EndEffector::State::READY),
+        setLiftHeight(i, false),
+        driveDistance(12, 75),
+        // really just wait until the lift is at its height
+        setLiftHeight(i, true),
+        driveVoltageTime(35, 35, 2),
+        setEndEffectorState(EndEffector::State::SCORING),
+    });
 
-void quadrant2Voltage() {
-  AutoManager::AutoManager manager = AutoManager::AutoManager({
-      // deploy the arms
-      driveVoltageTime(75, 75, 0.6),
-      driveVoltageTime(-127, -127, 1.2),
-      // set the toggle
-      driveVoltageTime(35, 35, 0.35),
-      driveVoltageTime(-45, -45, 0.5),
-      driveVoltageTime(35, 35, 0.35),
-      driveVoltageTime(-45, -45, 0.5),
-      // flip the latch so that the effector deploys properly
-      setClawState(EndEffector::State::INTAKING_RETRACTED),
-      // finish toggle
-      driveVoltageTime(35, 35, 0.35),
-      // point towards the target
-      turnBy(-45),
-      // get ready to score
-      setClawState(EndEffector::State::READY),
-      driveVoltageTime(35, 35, 1.75),
-      setClawState(EndEffector::State::SCORING),
-      waitFor(2),
-      driveVoltageTime(-55, -55, 0.75),
-      setClawState(EndEffector::State::RETRACTED),
-
-  });
-
-  manager.initialize();
-  while (!manager.isFinished()) {
-    manager.periodic();
-    drive.periodic();
-    endeffector.periodic();
-    pros::delay(DT_S * 1000.0);
+    cycleManager.initialize();
+    while (!cycleManager.isFinished()) {
+      cycleManager.periodic();
+      drive.periodic();
+      endeffector.periodic();
+      lift.periodic();
+      intake.periodic();
+      pros::delay(DT_S * 1000.0);
+    }
   }
 }
 
@@ -105,20 +125,20 @@ void quadrant1(Drivetrain::Drivetrain& drive, Intake::Intake& intake,
       driveVoltageTime(35, 35, 0.35),
       driveVoltageTime(-45, -45, 0.5),
       // flip the latch so that the effector deploys properly
-      setClawState(EndEffector::State::INTAKING_RETRACTED),
+      setEndEffectorState(EndEffector::State::INTAKING_RETRACTED),
       // finish toggle
       driveVoltageTime(35, 35, 0.35),
       // point towards the target
       turnBy(60),
       // get ready to score
-      setClawState(EndEffector::State::READY),
+      setEndEffectorState(EndEffector::State::READY),
       // setLiftHeight(5, false),
       driveDirection(12, 0),
       driveVoltageTime(55, 55, 0.5),
       // score
-      setClawState(EndEffector::State::SCORING),
+      setEndEffectorState(EndEffector::State::SCORING),
       waitFor(0.125),
-      setClawState(EndEffector::State::READY),
+      setEndEffectorState(EndEffector::State::READY),
       driveVoltageTime(-55, -55, 0.5),
       // liftClawIntake(),
       waitFor(1.125),
@@ -138,7 +158,7 @@ void quadrant1(Drivetrain::Drivetrain& drive, Intake::Intake& intake,
       driveDirection(10, 0),
       driveVoltageTime(35, 35, 0.5),
       // score
-      setClawState(EndEffector::State::SCORING),
+      setEndEffectorState(EndEffector::State::SCORING),
       waitFor(0.125),
       driveVoltageTime(-35, -35, 0.25),
       // liftClawIntake(),
@@ -190,6 +210,120 @@ void quadrant1(Drivetrain::Drivetrain& drive, Intake::Intake& intake,
   //   height += 6;
   // }
 }
+
+AutoManager::AutoCommand setEndEffectorState(EndEffector::State state) {
+  return {
+      [state]() { endeffector.setState(state); },
+      []() {},
+      []() { return true; },
+  };
+}
+
+AutoManager::AutoCommand liftClawIntake(bool wait) {
+  return {
+      []() {
+        // lift.setState(Lift::States::Position(0));
+      },
+      []() {},
+      [wait]() {
+        if (true || std::abs(lift.getHeight()) < 1.0) {
+          endeffector.setState(EndEffector::State::INTAKING_RETRACTED);
+          return true;
+        }
+        return !wait;
+      },
+  };
+}
+
+AutoManager::AutoCommand stationIntake() {
+  return {
+      []() { intake.setState(Intake::State::INTAKING_RETRACTED); },
+      []() {},
+      []() { return true; },
+  };
+}
+
+AutoManager::AutoCommand intakeIdle() {
+  return {
+      []() { intake.setState(Intake::State::IDLE_RETRACTED); },
+      []() {},
+      []() { return true; },
+  };
+}
+
+AutoManager::AutoCommand intakeExtended() {
+  return {
+      []() { intake.setState(Intake::State::INTAKING_EXTENDED); },
+      []() {},
+      []() { return true; },
+  };
+}
+
+#endif
+
+#ifdef ROBOT_2
+AutoManager::AutoCommand setClawState(Claw::State state);
+
+void quadrant2Voltage() {
+  AutoManager::AutoManager manager = AutoManager::AutoManager({
+      // deploy the arms
+      driveVoltageTime(75, 75, 0.6),
+      driveVoltageTime(-127, -127, 1.2),
+      // set the toggle
+      driveVoltageTime(35, 35, 0.35),
+      driveVoltageTime(-45, -45, 0.5),
+      driveVoltageTime(35, 35, 0.35),
+      driveVoltageTime(-45, -45, 0.5),
+      driveVoltageTime(35, 35, 0.35),
+      // point towards the target
+      setLiftHeight(5, false),
+      turnBy(-45),
+      // get ready to score
+      driveVoltageTime(35, 35, 1.75),
+      setClawState(Claw::State::OPEN),
+      waitFor(1.25),
+      // START NEW STUFF FROM LAST TESTING
+      driveDistance(10, -45),
+      turnBy(-45),
+      driveDistance(18, 50),
+  });
+
+  manager.initialize();
+  while (!manager.isFinished()) {
+    manager.periodic();
+    drive.periodic();
+    claw.periodic();
+    pros::delay(DT_S * 1000.0);
+  }
+
+  for (uint8_t i = 10; i <= 30; i += 10) {
+    AutoManager::AutoManager cycleManager = AutoManager::AutoManager({
+        driveVoltageTime(-60, -60, 2.5),
+        setClawState(Claw::State::CLOSED),
+        driveDistance(18, 70),
+        turnBy(-135),
+        setLiftHeight(i, false),
+        driveDistance(18, 45),
+        setLiftHeight(i, true),
+        driveVoltageTime(35, 35, 2),
+        setClawState(Claw::State::OPEN),
+        waitFor(1.25),
+        driveVoltageTime(-35, -35, 0.5),
+        setLiftHeight(0),
+        driveDistance(18, -45),
+        turnBy(135),
+    });
+
+    cycleManager.initialize();
+    while (!cycleManager.isFinished()) {
+      drive.periodic();
+      claw.periodic();
+      pros::delay(DT_S * 1000.0);
+    }
+  }
+}
+
+#endif
 
 AutoManager::AutoCommand driveVoltageTime(int32_t left, int32_t right,
                                           double time_s) {
@@ -266,52 +400,4 @@ AutoManager::AutoCommand setLiftHeight(double inches, bool wait) {
             return true;
             return (!wait) || std::abs(lift.getHeight() - inches) <= 1.0;
           }};
-}
-
-AutoManager::AutoCommand setClawState(EndEffector::State state) {
-  return {
-      [state]() { endeffector.setState(state); },
-      []() {},
-      []() { return true; },
-  };
-}
-
-AutoManager::AutoCommand liftClawIntake(bool wait) {
-  return {
-      []() {
-        // lift.setState(Lift::States::Position(0));
-      },
-      []() {},
-      [wait]() {
-        if (true || std::abs(lift.getHeight()) < 1.0) {
-          endeffector.setState(EndEffector::State::INTAKING_RETRACTED);
-          return true;
-        }
-        return !wait;
-      },
-  };
-}
-
-AutoManager::AutoCommand stationIntake() {
-  return {
-      []() { intake.setState(Intake::State::INTAKING_RETRACTED); },
-      []() {},
-      []() { return true; },
-  };
-}
-
-AutoManager::AutoCommand intakeIdle() {
-  return {
-      []() { intake.setState(Intake::State::IDLE_RETRACTED); },
-      []() {},
-      []() { return true; },
-  };
-}
-
-AutoManager::AutoCommand intakeExtended() {
-  return {
-      []() { intake.setState(Intake::State::INTAKING_EXTENDED); },
-      []() {},
-      []() { return true; },
-  };
 }

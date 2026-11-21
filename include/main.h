@@ -13,7 +13,7 @@
  */
 #pragma once
 
-#define ROBOT_1
+#define ROBOT_2
 
 #ifndef _PROS_MAIN_H_
 #define _PROS_MAIN_H_

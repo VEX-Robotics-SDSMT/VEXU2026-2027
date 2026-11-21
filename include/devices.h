@@ -1,5 +1,6 @@
 #pragma once
 #include "Drivetrain.h"
+#include "claw.hpp"
 #include "endeffector.h"
 #include "intake.h"
 #include "lift.h"
@@ -17,8 +18,6 @@ inline pros::Controller master(pros::controller_id_e_t::E_CONTROLLER_MASTER);
 //===============================================
 // Ports
 //===============================================
-
-#ifdef ROBOT_1
 
 // Left Motors
 const inline int8_t LM1 = 14;
@@ -41,9 +40,6 @@ const inline uint8_t imu = 19;
 const inline int8_t IN1 = 8;
 const inline int8_t IN2 = 10;
 
-// Score Motors
-const inline uint8_t SCORE1 = 2;
-
 // Lift Motors
 const inline int8_t LIFTMOTOR1 = 1;
 const inline int8_t LIFTMOTOR2 = 18;
@@ -58,8 +54,25 @@ const inline int8_t L2 = 1;
 
 // Pneumatics
 const inline char INTAKELIFT = 'A';
+
+#ifdef ROBOT_1
+// Score Motors
+const inline uint8_t SCORE1 = 2;
 const inline char SCOREARM = 'B';
 
+inline pros::MotorGroup scoreMotors({SCORE1});
+inline pros::adi::Pneumatics scoreFlipperPneumatics(SCOREARM, false);
+
+inline EndEffector::EndEffector endeffector(&scoreFlipperPneumatics,
+                                            &scoreMotors);
+#endif
+
+#ifdef ROBOT_2
+const inline char CLAW_OPEN = 'B';
+
+inline pros::adi::Pneumatics clawPneumatics(CLAW_OPEN, false);
+
+inline Claw::Claw claw(clawPneumatics);
 #endif
 
 //===============================================
@@ -82,7 +95,6 @@ inline pros::MotorGroup loaders({L1, -L2});
 // Elevator Motors
 inline pros::MotorGroup liftMotors({-LIFTMOTOR1, LIFTMOTOR2});
 // Score Motors
-inline pros::MotorGroup scoreMotors({SCORE1});
 
 //===============================================
 // Sensors
@@ -99,14 +111,10 @@ inline pros::Rotation liftEncoder(LIFTENC);
 //===============================================
 inline pros::adi::Pneumatics intakePneumatics(INTAKELIFT, true, true);
 
-inline pros::adi::Pneumatics scoreFlipperPneumatics(SCOREARM, false);
-
 //===============================================
 // Drivetrain
 //===============================================
 
 inline Drivetrain::Drivetrain drive(&leftMotors, &rightMotors, &xEncoder, &Imu);
 inline Intake::Intake intake(&intakePneumatics, &intakeMotors);
-inline EndEffector::EndEffector endeffector(&scoreFlipperPneumatics,
-                                            &scoreMotors);
 inline Lift::Lift lift(&liftMotors, &liftEncoder);

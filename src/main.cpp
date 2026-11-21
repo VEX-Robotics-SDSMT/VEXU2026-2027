@@ -66,7 +66,14 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() { quadrant2Voltage(); }
+void autonomous() {
+#ifdef ROBOT_1
+  quadrant1Voltage();
+#endif
+#ifdef ROBOT_2
+  quadrant2Voltage();
+#endif
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -85,6 +92,7 @@ void opcontrol() {
   pros::Controller master(pros::E_CONTROLLER_MASTER);
 
   while (true) {
+#ifdef ROBOT_1
     if (master.get_digital_new_press(DriverBindings::toggleIntake)) {
       intake.toggleWheels();
     } else if (master.get_digital_new_press(DriverBindings::toggleOuttake)) {
@@ -109,6 +117,21 @@ void opcontrol() {
     if (master.get_digital_new_press(DriverBindings::clawScoreToggle)) {
       endeffector.toggleDirection();
     }
+#endif
+
+#ifdef ROBOT_2
+    if (master.get_digital(DriverBindings::liftDown)) {
+      lift.setState(Lift::States::Voltage(-80));
+    } else if (master.get_digital(DriverBindings::liftUp)) {
+      lift.setState(Lift::States::Voltage(127));
+    }
+
+    if (master.get_digital(DriverBindings::clawOpen)) {
+      claw.open();
+    } else if (master.get_digital(DriverBindings::clawClose)) {
+      claw.close();
+    }
+#endif
 
     int dr = master.get_analog(
         ANALOG_LEFT_Y);  // Gets amount forward/backward from left joystick
@@ -120,7 +143,12 @@ void opcontrol() {
 
     drive.periodic();
     intake.periodic();
+#ifdef ROBOT_1
     endeffector.periodic();
+#endif
+#ifdef ROBOT_2
+    claw.periodic();
+#endif
     lift.periodic();
 
     pros::delay(DT_S * 1000.0);  // Run for 20 ms then update
