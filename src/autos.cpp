@@ -323,6 +323,12 @@ void quadrant2Voltage() {
   }
 }
 
+AutoManager::AutoCommand setClawState(Claw::State state) {
+  return {
+    [state]() { claw.setState(state); }, []() {}, []() { return true; },
+  };
+}
+
 #endif
 
 AutoManager::AutoCommand driveVoltageTime(int32_t left, int32_t right,
